@@ -1,1 +1,2 @@
-export * from './api/common';
+export * from './api/common.js';
+export * from './api/pagination.js';
