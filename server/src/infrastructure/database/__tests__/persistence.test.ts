@@ -1,0 +1,81 @@
+import test, { suite } from 'node:test';
+import assert from 'node:assert';
+import { pool } from '../pool.js';
+import { db } from '../query.js';
+import { withTransaction } from '../transaction.js';
+import { execSync } from 'child_process';
+import path from 'path';
+
+suite('Persistence Infrastructure', async () => {
+  // Test connection first
+  let dbAvailable = false;
+  
+  test('A. Connection Verification', async (t) => {
+    try {
+      const client = await pool.connect();
+      client.release();
+      dbAvailable = true;
+      assert.ok(true, 'Connection successful');
+    } catch (err: any) {
+      dbAvailable = false;
+      console.warn('REAL POSTGRESQL TESTS: NOT EXECUTED');
+      console.warn('Database connection failed:', err.message);
+      // The instructions say: "If DATABASE_URL is unavailable, the test setup must fail clearly rather than pretending the test passed."
+      // Throwing the error fails the test clearly.
+      throw err;
+    }
+  });
+
+  test('B. Query Execution', { skip: !dbAvailable }, async (t) => {
+    const result = await db.query<{ num: number }>('SELECT 1 as num');
+    assert.strictEqual(result.rows.length, 1);
+    assert.strictEqual(result.rows[0].num, 1);
+  });
+
+  test('C. Transaction Commit', { skip: !dbAvailable }, async (t) => {
+    await withTransaction(async (txClient) => {
+      const res = await txClient.query<{ val: number }>('SELECT 2 as val');
+      assert.strictEqual(res.rows[0].val, 2);
+    });
+    assert.ok(true, 'Transaction committed without throwing');
+  });
+
+  test('D. Transaction Rollback', { skip: !dbAvailable }, async (t) => {
+    try {
+      await withTransaction(async (txClient) => {
+        await txClient.query<{ val: number }>('SELECT 3 as val');
+        throw new Error('Trigger rollback');
+      });
+      assert.fail('Should have thrown');
+    } catch (err: any) {
+      assert.strictEqual(err.message, 'Trigger rollback');
+    }
+  });
+
+  test('E. Transaction Connection Isolation', { skip: !dbAvailable }, async (t) => {
+    // We can verify isolation by checking the backend PID of the connection
+    await withTransaction(async (txClient) => {
+      const res1 = await txClient.query<{ pid: number }>('SELECT pg_backend_pid() as pid');
+      const res2 = await txClient.query<{ pid: number }>('SELECT pg_backend_pid() as pid');
+      assert.strictEqual(res1.rows[0].pid, res2.rows[0].pid, 'Must use same client/PID');
+    });
+  });
+
+  test('G. Migration Verification', { skip: !dbAvailable }, async (t) => {
+    // We verify the migration runner script structurally
+    // It should exit cleanly if there are no migrations or if it's already up to date.
+    const runnerPath = path.resolve(__dirname, '../migration-runner.ts');
+    try {
+      const output = execSync(`npx tsx ${runnerPath}`, { encoding: 'utf-8', env: process.env });
+      assert.ok(output.includes('Database is up to date') || output.includes('Successfully applied'), 'Migration runner completed');
+    } catch (err: any) {
+      assert.fail(`Migration runner failed: ${err.message}`);
+    }
+  });
+
+  test('F. Disconnect / Pool Shutdown', async (t) => {
+    // This is the last test, it shuts down the pool
+    await pool.end();
+    assert.strictEqual(pool.totalCount, 0, 'Pool should have 0 total clients after end');
+  });
+});
