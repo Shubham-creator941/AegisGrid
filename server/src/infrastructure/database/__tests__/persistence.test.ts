@@ -12,6 +12,11 @@ suite('Persistence Infrastructure', async () => {
   
   test('A. Connection Verification', async (t) => {
     try {
+      // 1. SAFETY: Never silently use production DATABASE_URL for tests
+      if (!process.env.TEST_DATABASE_URL && process.env.NODE_ENV !== 'test') {
+        throw new Error('Refusing to run tests against potential production database. Must set TEST_DATABASE_URL or NODE_ENV=test.');
+      }
+
       const client = await pool.connect();
       client.release();
       dbAvailable = true;
@@ -19,7 +24,7 @@ suite('Persistence Infrastructure', async () => {
     } catch (err: any) {
       dbAvailable = false;
       console.warn('REAL POSTGRESQL TESTS: NOT EXECUTED');
-      console.warn('Database connection failed:', err.message);
+      console.warn('Database connection failed or unsafe environment:', err.message);
       // The instructions say: "If DATABASE_URL is unavailable, the test setup must fail clearly rather than pretending the test passed."
       // Throwing the error fails the test clearly.
       throw err;
