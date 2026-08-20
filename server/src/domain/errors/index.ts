@@ -10,3 +10,14 @@ export class InvalidStateTransitionError extends Error {
     this.name = 'InvalidStateTransitionError';
   }
 }
+
+export class BusinessRuleError extends Error {
+  constructor(
+    public readonly code: string,
+    message: string,
+    public readonly details?: unknown
+  ) {
+    super(message);
+    this.name = 'BusinessRuleError';
+  }
+}
