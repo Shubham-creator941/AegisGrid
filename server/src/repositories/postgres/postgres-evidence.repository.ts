@@ -79,4 +79,26 @@ export class PostgresEvidenceRepository implements EvidenceRepository {
       }
     };
   }
+
+  async listByEventId(eventId: string, page: number, pageSize: number): Promise<PaginatedResult<Evidence>> {
+    const offset = (page - 1) * pageSize;
+    const [dataResult, countResult] = await Promise.all([
+      this.db.query<Evidence>(
+        'SELECT * FROM evidence WHERE event_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
+        [eventId, pageSize, offset]
+      ),
+      this.db.query<{count: string}>('SELECT COUNT(*) FROM evidence WHERE event_id = $1', [eventId])
+    ]);
+    
+    const total = parseInt(countResult.rows[0].count, 10);
+    return {
+      data: dataResult.rows,
+      meta: {
+        page,
+        page_size: pageSize,
+        total,
+        total_pages: Math.ceil(total / pageSize)
+      }
+    };
+  }
 }

@@ -6,4 +6,5 @@ export interface EvidenceRepository {
   create(entity: Omit<Evidence, 'id' | 'created_at' | 'updated_at'>): Promise<Evidence>;
   update(id: string, entity: Partial<Evidence>): Promise<Evidence | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<Evidence>>;
+  listByEventId(eventId: string, page: number, pageSize: number): Promise<PaginatedResult<Evidence>>;
 }
