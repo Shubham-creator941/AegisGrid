@@ -13,6 +13,3 @@ const createScenarioService = new CreateScenarioService(scenarioRepo, eventRepo)
 const scenarioController = new ScenarioController(createScenarioService);
 
 scenariosRouter.post('/', scenarioController.createScenario);
-
-// Future endpoints stub
-scenariosRouter.get('/', (req, res) => res.status(501).json({ error: 'Not Implemented' }));

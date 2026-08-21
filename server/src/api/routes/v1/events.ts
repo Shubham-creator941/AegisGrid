@@ -12,6 +12,3 @@ const createEventService = new CreateEventService(eventRepo);
 const eventController = new EventController(createEventService);
 
 eventsRouter.post('/', eventController.createEvent);
-
-// Future endpoints stub
-eventsRouter.get('/', (req, res) => res.status(501).json({ error: 'Not Implemented' }));
