@@ -5,6 +5,7 @@ export * from './corridor.repository.js';
 export * from './supply-flow.repository.js';
 export * from './event.repository.js';
 export * from './evidence.repository.js';
+export * from './ai-analysis.repository.js';
 export * from './risk-assessment.repository.js';
 export * from './scenario.repository.js';
 export * from './scenario-assumption.repository.js';
