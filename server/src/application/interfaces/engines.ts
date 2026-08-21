@@ -41,8 +41,21 @@ export interface ImpactResult {
   overall_impact: number;
   calculation_version: string;
 }
+import { ImpactAssessment } from '../../domain/entities/impact-assessment.js';
+import { ResponseCandidate } from '../../domain/entities/response-candidate.js';
+
 export interface ImpactEngine {
   calculate(input: ImpactInput): Promise<ImpactResult>;
+}
+
+export interface ResponseInput {
+  scenarioContext: ScenarioContext;
+  simulationResult: SimulationResult;
+  impactAssessment: ImpactAssessment;
+}
+
+export interface ResponseEngine {
+  generate(input: ResponseInput): Promise<ResponseCandidate[]>;
 }
 
 export interface ConstraintInput {
