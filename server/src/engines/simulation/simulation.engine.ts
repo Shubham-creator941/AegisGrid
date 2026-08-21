@@ -1,4 +1,5 @@
-import { SimulationEngine, SimulationInput, SimulationResult } from '../../application/interfaces/engines.js';
+import { SimulationEngine, SimulationInput } from '../../application/interfaces/engines.js';
+import { SimulationResult } from '../../domain/entities/simulation-result.js';
 import { BusinessRuleError } from '../../domain/errors/index.js';
 
 export class DeterministicSimulationEngine implements SimulationEngine {
@@ -15,12 +16,15 @@ export class DeterministicSimulationEngine implements SimulationEngine {
     const shortfall = 0;
 
     const result: SimulationResult = {
+      id: `sim-${input.scenario.id}`,
+      evaluation_id: `eval-${input.scenario.id}`,
       available_supply: availableSupply,
       affected_capacity: affectedCapacity,
       shortfall: shortfall,
       reserve_level: 0, // Explicitly isolated minimal behavior
       network_state: input.networkState.snapshot_data, // Propagates deterministic network state
-      calculation_version: this.ENGINE_VERSION
+      calculation_version: this.ENGINE_VERSION,
+      created_at: new Date(0)
     };
 
     return result;

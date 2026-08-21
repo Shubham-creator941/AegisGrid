@@ -9,15 +9,7 @@ export interface SimulationInput {
   disruption: Event;
   assumptions: ScenarioAssumption[];
 }
-
-export interface SimulationResult {
-  available_supply: number;
-  affected_capacity: number;
-  shortfall: number;
-  reserve_level: number;
-  network_state: unknown;
-  calculation_version: string;
-}
+import { SimulationResult } from '../../domain/entities/simulation-result.js';
 
 export interface SimulationEngine {
   simulate(input: SimulationInput): Promise<SimulationResult>;
@@ -32,20 +24,11 @@ export interface ImpactInput {
   simulationResult: SimulationResult;
   scenarioContext: ScenarioContext;
 }
-export interface ImpactResult {
-  supply_impact: number;
-  economic_impact: number;
-  operational_impact: number;
-  reserve_impact: number;
-  resilience_impact: number;
-  overall_impact: number;
-  calculation_version: string;
-}
 import { ImpactAssessment } from '../../domain/entities/impact-assessment.js';
 import { ResponseCandidate } from '../../domain/entities/response-candidate.js';
 
 export interface ImpactEngine {
-  calculate(input: ImpactInput): Promise<ImpactResult>;
+  calculate(input: ImpactInput): Promise<ImpactAssessment>;
 }
 
 export interface ResponseInput {
@@ -59,15 +42,13 @@ export interface ResponseEngine {
 }
 
 export interface ConstraintInput {
-  responseCandidateId: string;
+  responseCandidate: ResponseCandidate;
+  scenarioContext: ScenarioContext;
+  networkSnapshot: NetworkSnapshot;
 }
-export interface ConstraintResult {
-  feasible: boolean;
-  violations: any;
-  constraint_version: string;
-}
+
 export interface ConstraintEngine {
-  evaluate(input: ConstraintInput): Promise<ConstraintResult>;
+  evaluate(input: ConstraintInput): Promise<ConstraintEvaluation>;
 }
 
 import { ConstraintEvaluation } from '../../domain/entities/constraint-evaluation.js';

@@ -19,10 +19,10 @@ suite('DeterministicScoringEngine', () => {
   };
 
   const mockConstraintEvaluation = {
-    id: 'constraint-eval-1',
+    id: 'eval-1',
     evaluation_id: 'eval-1',
     response_candidate_id: 'candidate-1',
-    is_feasible: true,
+    feasible: true,
     violations: {},
     constraint_version: '1.0',
     evaluated_at: new Date()

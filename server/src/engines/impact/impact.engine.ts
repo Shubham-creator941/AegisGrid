@@ -1,10 +1,11 @@
-import { ImpactEngine, ImpactInput, ImpactResult } from '../../application/interfaces/engines.js';
+import { ImpactEngine, ImpactInput } from '../../application/interfaces/engines.js';
+import { ImpactAssessment } from '../../domain/entities/impact-assessment.js';
 import { BusinessRuleError } from '../../domain/errors/index.js';
 
 export class DeterministicImpactEngine implements ImpactEngine {
   private readonly ENGINE_VERSION = '1.0.0-deterministic';
 
-  public async calculate(input: ImpactInput): Promise<ImpactResult> {
+  public async calculate(input: ImpactInput): Promise<ImpactAssessment> {
     this.validateInput(input);
 
     // The authoritative specification ("Context of aegis.pdf") defines the dimensions 
@@ -14,14 +15,17 @@ export class DeterministicImpactEngine implements ImpactEngine {
     // In strict adherence to Task 4.2 constraints ("do NOT invent mathematics"), 
     // we return a deterministic, source-supported minimal representation (0 for all dimensions).
     // This explicitly prevents unsupported business calculations from being claimed as authoritative.
-    const result: ImpactResult = {
+    const result: ImpactAssessment = {
+      id: `impact-${input.scenarioContext.scenario.id}`,
+      evaluation_id: `eval-${input.scenarioContext.scenario.id}`,
       supply_impact: 0,
       economic_impact: 0,
       operational_impact: 0,
       reserve_impact: 0,
       resilience_impact: 0,
       overall_impact: 0,
-      calculation_version: this.ENGINE_VERSION
+      calculation_version: this.ENGINE_VERSION,
+      created_at: new Date(0)
     };
 
     return result;

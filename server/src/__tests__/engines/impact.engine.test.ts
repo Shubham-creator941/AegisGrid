@@ -8,6 +8,9 @@ suite('DeterministicImpactEngine', () => {
   const engine = new DeterministicImpactEngine();
 
   const mockSimulationResult = {
+    id: 'sim-1',
+    evaluation_id: 'eval-1',
+    created_at: new Date(),
     available_supply: 500,
     affected_capacity: 500,
     shortfall: 500,
@@ -54,6 +57,9 @@ suite('DeterministicImpactEngine', () => {
     const result = await engine.calculate(validBaseInput);
 
     assert.strictEqual(result.calculation_version, '1.0.0-deterministic');
+    assert.strictEqual(result.id, 'impact-scenario-1');
+    assert.strictEqual(result.evaluation_id, 'eval-scenario-1');
+    assert.strictEqual(result.created_at.getTime(), 0);
     
     // The PDF does not define mathematical formulas for Impact, so it deterministicly returns 0 
     // to avoid inventing authoritative behavior.

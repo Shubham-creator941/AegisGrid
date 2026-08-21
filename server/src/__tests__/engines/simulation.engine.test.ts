@@ -69,6 +69,9 @@ suite('DeterministicSimulationEngine', () => {
     const result = await engine.simulate(validBaseInput);
 
     assert.strictEqual(result.calculation_version, '1.0.0-deterministic');
+    assert.strictEqual(result.id, 'sim-scenario-1');
+    assert.strictEqual(result.evaluation_id, 'eval-scenario-1');
+    assert.strictEqual(result.created_at.getTime(), 0);
     assert.strictEqual(result.affected_capacity, 0); // No authoritative formula provided
     assert.strictEqual(result.available_supply, 0);
     assert.strictEqual(result.shortfall, 0);

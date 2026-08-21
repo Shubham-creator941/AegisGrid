@@ -37,6 +37,9 @@ suite('DeterministicResponseEngine', () => {
   };
 
   const mockSimulationResult = {
+    id: 'sim-1',
+    evaluation_id: 'eval-1',
+    created_at: new Date(),
     available_supply: 500,
     affected_capacity: 500,
     shortfall: 500,
