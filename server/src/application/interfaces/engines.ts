@@ -93,17 +93,12 @@ export interface RankingEngine {
   rank(input: RankingInput): Promise<RankedResponse[]>;
 }
 
+import { Recommendation } from '../../domain/entities/recommendation.js';
+
 export interface RecommendationInput {
-  evaluationId: string;
+  rankedResponses: RankedResponse[];
 }
-export interface RecommendationResult {
-  recommended_response_id: string;
-  score: number;
-  confidence: number;
-  rationale: string;
-  tradeoffs: string[];
-  uncertainty: string[];
-}
+
 export interface RecommendationEngine {
-  recommend(input: RecommendationInput): Promise<RecommendationResult>;
+  recommend(input: RecommendationInput): Promise<Recommendation>;
 }
