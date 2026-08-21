@@ -23,8 +23,14 @@ export interface SimulationEngine {
   simulate(input: SimulationInput): Promise<SimulationResult>;
 }
 
+export interface ScenarioContext {
+  scenario: Scenario;
+  disruption: Event;
+}
+
 export interface ImpactInput {
   simulationResult: SimulationResult;
+  scenarioContext: ScenarioContext;
 }
 export interface ImpactResult {
   supply_impact: number;
