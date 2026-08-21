@@ -70,28 +70,27 @@ export interface ConstraintEngine {
   evaluate(input: ConstraintInput): Promise<ConstraintResult>;
 }
 
+import { ConstraintEvaluation } from '../../domain/entities/constraint-evaluation.js';
+import { ResponseScore } from '../../domain/entities/response-score.js';
+import { RankedResponse } from '../../domain/entities/ranked-response.js';
+
 export interface ScoringInput {
-  candidateId: string;
+  responseCandidate: ResponseCandidate;
+  constraintEvaluation: ConstraintEvaluation;
+  impactAssessment: ImpactAssessment;
+  scenarioContext: ScenarioContext;
 }
-export interface ScoringResult {
-  overall_score: number;
-  dimension_scores: any;
-  weights: any;
-  scoring_version: string;
-}
+
 export interface ScoringEngine {
-  score(input: ScoringInput): Promise<ScoringResult>;
+  score(input: ScoringInput): Promise<ResponseScore>;
 }
 
 export interface RankingInput {
-  evaluationId: string;
+  scores: ResponseScore[];
 }
-export interface RankedResult {
-  candidateId: string;
-  rank: number;
-}
+
 export interface RankingEngine {
-  rank(input: RankingInput): Promise<RankedResult[]>;
+  rank(input: RankingInput): Promise<RankedResponse[]>;
 }
 
 export interface RecommendationInput {
