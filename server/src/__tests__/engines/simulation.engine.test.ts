@@ -69,9 +69,9 @@ suite('DeterministicSimulationEngine', () => {
     const result = await engine.simulate(validBaseInput);
 
     assert.strictEqual(result.calculation_version, '1.0.0-deterministic');
-    assert.strictEqual(result.affected_capacity, 350); // HIGH (300) + assumption (50)
-    assert.strictEqual(result.available_supply, 650); // 1000 - 350
-    assert.strictEqual(result.shortfall, 350);
+    assert.strictEqual(result.affected_capacity, 0); // No authoritative formula provided
+    assert.strictEqual(result.available_supply, 0);
+    assert.strictEqual(result.shortfall, 0);
     assert.strictEqual(result.reserve_level, 0);
     assert.deepStrictEqual(result.network_state, mockNetworkState.snapshot_data);
     
@@ -93,9 +93,9 @@ suite('DeterministicSimulationEngine', () => {
     const inputWithEmptyAssumptions = { ...validBaseInput, assumptions: [] };
     const result = await engine.simulate(inputWithEmptyAssumptions);
 
-    // HIGH severity = 300 affected, no assumption modifiers
-    assert.strictEqual(result.affected_capacity, 300);
-    assert.strictEqual(result.available_supply, 700);
+    // No authoritative formula provided, always 0
+    assert.strictEqual(result.affected_capacity, 0);
+    assert.strictEqual(result.available_supply, 0);
   });
 
   test('boundary values (negative assumption modifiers resulting in zero floor)', async () => {
@@ -107,8 +107,8 @@ suite('DeterministicSimulationEngine', () => {
     };
     const result = await engine.simulate(inputBoundary);
 
-    assert.strictEqual(result.affected_capacity, 0); // Floors at 0
-    assert.strictEqual(result.available_supply, 1000);
+    assert.strictEqual(result.affected_capacity, 0); // No authoritative formula provided
+    assert.strictEqual(result.available_supply, 0);
   });
 
   test('invalid required input throws BusinessRuleError', async () => {
@@ -156,6 +156,6 @@ suite('DeterministicSimulationEngine', () => {
     };
     const result = await engine.simulate(criticalInput);
 
-    assert.strictEqual(result.affected_capacity, 550); // CRITICAL (500) + assumption (50)
+    assert.strictEqual(result.affected_capacity, 0); // No authoritative formula provided
   });
 });

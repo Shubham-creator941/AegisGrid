@@ -7,40 +7,16 @@ export class DeterministicSimulationEngine implements SimulationEngine {
   public async simulate(input: SimulationInput): Promise<SimulationResult> {
     this.validateInput(input);
 
-    // Deterministic foundational calculation
-    // Does not invent advanced formulas, uses explicit deterministic transformations based on inputs
-    const baseCapacity = 1000; // Baseline deterministic capacity
-    let affectedCapacity = 0;
-    
-    // Minimal authoritative logic mapping severity to a deterministic impact foundation
-    if (input.disruption.severity === 'CRITICAL') {
-        affectedCapacity = 500;
-    } else if (input.disruption.severity === 'HIGH') {
-        affectedCapacity = 300;
-    } else if (input.disruption.severity === 'MEDIUM') {
-        affectedCapacity = 150;
-    } else {
-        affectedCapacity = 50;
-    }
-
-    // Assumptions modulate the capacity deterministically
-    let assumptionModifier = 0;
-    if (Array.isArray(input.assumptions)) {
-      for (const assumption of input.assumptions) {
-        if (typeof assumption.parameter_value === 'number') {
-          // Simplistic deterministic modulation to prove the integration works
-          assumptionModifier += assumption.parameter_value;
-        }
-      }
-    }
-
-    const totalAffected = Math.max(0, affectedCapacity + assumptionModifier);
-    const availableSupply = Math.max(0, baseCapacity - totalAffected);
-    const shortfall = Math.max(0, totalAffected);
+    // The authoritative specification ("Context of aegis.pdf") does not provide a numerical simulation formula.
+    // To avoid presenting invented formulas as authoritative, we return 0 for all calculated metrics.
+    // This provides the smallest source-supported deterministic behavior.
+    const availableSupply = 0;
+    const affectedCapacity = 0;
+    const shortfall = 0;
 
     const result: SimulationResult = {
       available_supply: availableSupply,
-      affected_capacity: totalAffected,
+      affected_capacity: affectedCapacity,
       shortfall: shortfall,
       reserve_level: 0, // Explicitly isolated minimal behavior
       network_state: input.networkState.snapshot_data, // Propagates deterministic network state
