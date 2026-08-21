@@ -1,5 +1,5 @@
 import { TransactionManager } from '../../application/interfaces/transaction-manager.interface.js';
-import { withTransaction } from '../database/transaction.js';
+import { withTransaction } from '../../infrastructure/database/transaction.js';
 
 export class PostgresTransactionManager implements TransactionManager {
   async execute<T>(operation: () => Promise<T>): Promise<T> {
