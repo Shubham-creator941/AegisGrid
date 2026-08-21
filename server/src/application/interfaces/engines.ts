@@ -1,15 +1,24 @@
+import { NetworkSnapshot } from '../../domain/entities/network-snapshot.js';
+import { Scenario } from '../../domain/entities/scenario.js';
+import { Event } from '../../domain/entities/event.js';
+import { ScenarioAssumption } from '../../domain/entities/scenario-assumption.js';
+
 export interface SimulationInput {
-  scenarioId: string;
-  networkSnapshotId: string;
+  networkState: NetworkSnapshot;
+  scenario: Scenario;
+  disruption: Event;
+  assumptions: ScenarioAssumption[];
 }
+
 export interface SimulationResult {
   available_supply: number;
   affected_capacity: number;
   shortfall: number;
   reserve_level: number;
-  network_state: any;
+  network_state: unknown;
   calculation_version: string;
 }
+
 export interface SimulationEngine {
   simulate(input: SimulationInput): Promise<SimulationResult>;
 }
