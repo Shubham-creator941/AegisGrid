@@ -79,4 +79,12 @@ export class PostgresRiskAssessmentRepository implements RiskAssessmentRepositor
       }
     };
   }
+
+  async findByEventId(eventId: string): Promise<RiskAssessment | null> {
+    const result = await this.db.query<RiskAssessment>(
+      'SELECT * FROM risk_assessments WHERE event_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [eventId]
+    );
+    return result.rows[0] || null;
+  }
 }

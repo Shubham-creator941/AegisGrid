@@ -6,4 +6,5 @@ export interface ScenarioAssumptionRepository {
   create(entity: Omit<ScenarioAssumption, 'id' | 'created_at' | 'updated_at'>): Promise<ScenarioAssumption>;
   update(id: string, entity: Partial<ScenarioAssumption>): Promise<ScenarioAssumption | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<ScenarioAssumption>>;
+  listByScenarioId(scenarioId: string): Promise<ScenarioAssumption[]>;
 }

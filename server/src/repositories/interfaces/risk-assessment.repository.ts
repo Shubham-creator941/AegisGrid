@@ -6,4 +6,5 @@ export interface RiskAssessmentRepository {
   create(entity: Omit<RiskAssessment, 'id' | 'created_at' | 'updated_at'>): Promise<RiskAssessment>;
   update(id: string, entity: Partial<RiskAssessment>): Promise<RiskAssessment | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<RiskAssessment>>;
+  findByEventId(eventId: string): Promise<RiskAssessment | null>;
 }

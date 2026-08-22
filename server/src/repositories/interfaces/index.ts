@@ -16,3 +16,4 @@ export * from './response-score.repository.js';
 export * from './recommendation.repository.js';
 export * from './decision.repository.js';
 export * from './audit-log.repository.js';
+export * from './network.repository.js';

@@ -79,4 +79,12 @@ export class PostgresScenarioAssumptionRepository implements ScenarioAssumptionR
       }
     };
   }
+
+  async listByScenarioId(scenarioId: string): Promise<ScenarioAssumption[]> {
+    const result = await this.db.query<ScenarioAssumption>(
+      'SELECT * FROM scenario_assumptions WHERE scenario_id = $1 ORDER BY created_at ASC',
+      [scenarioId]
+    );
+    return result.rows;
+  }
 }

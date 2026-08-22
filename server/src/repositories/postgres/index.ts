@@ -15,3 +15,4 @@ export * from './postgres-response-score.repository.js';
 export * from './postgres-recommendation.repository.js';
 export * from './postgres-decision.repository.js';
 export * from './postgres-audit-log.repository.js';
+export * from './postgres-network.repository.js';
