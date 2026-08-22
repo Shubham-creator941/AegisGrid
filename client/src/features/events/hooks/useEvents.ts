@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Event, Evidence } from '../api/events.api';
+import type { Event, Evidence, AIAnalysis, RiskAssessment } from '../api/events.api';
 import { EventsApi } from '../api/events.api';
 
 export function useEventsList() {
@@ -101,6 +101,94 @@ export function useEvidenceList(eventId: string | undefined) {
       } catch (err: any) {
         if (mounted) {
           setError(err?.response?.data?.error?.code || 'EVIDENCE_FETCH_ERROR');
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+    fetchData();
+    return () => {
+      mounted = false;
+    };
+  }, [eventId]);
+
+  return { data, loading, error };
+}
+
+export function useAIAnalysis(eventId: string | undefined) {
+  const [data, setData] = useState<AIAnalysis | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!eventId) {
+      setData(null);
+      setError(null);
+      return;
+    }
+
+    let mounted = true;
+    async function fetchData() {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await EventsApi.getAnalysis(eventId as string);
+        if (mounted) {
+          setData(res);
+        }
+      } catch (err: any) {
+        if (mounted) {
+          if (err?.response?.status === 404) {
+             setData(null); // Valid empty state if not generated
+          } else {
+             setError(err?.response?.data?.error?.code || 'ANALYSIS_FETCH_ERROR');
+          }
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+    fetchData();
+    return () => {
+      mounted = false;
+    };
+  }, [eventId]);
+
+  return { data, loading, error };
+}
+
+export function useRiskAssessment(eventId: string | undefined) {
+  const [data, setData] = useState<RiskAssessment | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!eventId) {
+      setData(null);
+      setError(null);
+      return;
+    }
+
+    let mounted = true;
+    async function fetchData() {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await EventsApi.getRiskAssessment(eventId as string);
+        if (mounted) {
+          setData(res);
+        }
+      } catch (err: any) {
+        if (mounted) {
+          if (err?.response?.status === 404) {
+             setData(null); // Valid empty state
+          } else {
+             setError(err?.response?.data?.error?.code || 'RISK_ASSESSMENT_FETCH_ERROR');
+          }
         }
       } finally {
         if (mounted) {

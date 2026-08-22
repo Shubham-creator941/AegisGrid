@@ -11,11 +11,14 @@ import {
 import { useEventsList } from '../features/events/hooks/useEvents';
 import { EventDetail } from '../features/events/components/EventDetail';
 import { EvidenceList } from '../features/events/components/EvidenceList';
+import { AnalysisWorkspace } from '../features/analysis/components/AnalysisWorkspace';
+import { BrainCircuit } from 'lucide-react';
 const format = (date: Date, _fmt?: string) => date.toLocaleDateString();
 import type { Event } from '../features/events/api/events.api';
 
 export default function Events() {
   const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
+  const [activeTab, setActiveTab] = useState<'EVIDENCE' | 'ANALYSIS'>('ANALYSIS');
   const { data: events, loading, error } = useEventsList();
 
   const getSeverityConfig = (severity: string) => {
@@ -103,7 +106,7 @@ export default function Events() {
                   
                   <div className="flex items-center justify-between text-xs text-slate-500 mt-1">
                     <span className="line-clamp-1">{ev.affected_region || 'Unknown Location'}</span>
-                    <span className="shrink-0">{ev.detected_at ? format(new Date(ev.detected_at), 'MMM d') : '-'}</span>
+                    <span className="shrink-0">{ev.detected_at ? format(new Date(ev.detected_at)) : '-'}</span>
                   </div>
                 </button>
               );
@@ -125,11 +128,28 @@ export default function Events() {
               </div>
               
               <div className="flex-1 overflow-y-auto p-6 bg-slate-950/50">
-                <div className="flex items-center gap-2 mb-4 text-slate-300">
-                  <FileText size={18} />
-                  <h3 className="font-semibold">Evidence Log</h3>
+                <div className="flex items-center gap-6 border-b border-slate-800 mb-6 pb-2">
+                  <button 
+                    onClick={() => setActiveTab('EVIDENCE')}
+                    className={`flex items-center gap-2 pb-2 -mb-[9px] border-b-2 font-semibold text-sm transition-colors ${activeTab === 'EVIDENCE' ? 'border-blue-500 text-slate-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+                  >
+                    <FileText size={16} />
+                    Evidence Log
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('ANALYSIS')}
+                    className={`flex items-center gap-2 pb-2 -mb-[9px] border-b-2 font-semibold text-sm transition-colors ${activeTab === 'ANALYSIS' ? 'border-purple-500 text-slate-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+                  >
+                    <BrainCircuit size={16} />
+                    AI Analysis & Risk
+                  </button>
                 </div>
-                <EvidenceList eventId={selectedEvent.id} />
+                
+                {activeTab === 'EVIDENCE' ? (
+                  <EvidenceList eventId={selectedEvent.id} />
+                ) : (
+                  <AnalysisWorkspace event={selectedEvent} />
+                )}
               </div>
             </div>
           )}
