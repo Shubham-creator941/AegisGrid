@@ -5,6 +5,12 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   optimizeDeps: { include: ['shared'] },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+      '/health': 'http://localhost:3001'
+    }
+  },
   plugins: [
     react(),
     tailwindcss(),
