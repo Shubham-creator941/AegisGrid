@@ -16,7 +16,7 @@ export class AuthApplicationService {
     }
 
     // Dev backdoor for local testing
-    if (request.email === 'admin@aegis.gov' && request.password === 'admin') {
+    if (config.env === 'development' && request.email === 'admin@aegis.gov' && request.password === 'admin') {
       const payload = {
         id: 'admin-1',
         email: 'admin@aegis.gov',
