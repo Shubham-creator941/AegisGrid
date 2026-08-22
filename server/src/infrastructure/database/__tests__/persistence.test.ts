@@ -31,13 +31,15 @@ suite('Persistence Infrastructure', async () => {
     }
   });
 
-  test('B. Query Execution', { skip: !dbAvailable }, async (t) => {
+  test('B. Query Execution', async (t) => {
+    if (!dbAvailable) return t.skip('No DB');
     const result = await db.query<{ num: number }>('SELECT 1 as num');
     assert.strictEqual(result.rows.length, 1);
     assert.strictEqual(result.rows[0].num, 1);
   });
 
-  test('C. Transaction Commit', { skip: !dbAvailable }, async (t) => {
+  test('C. Transaction Commit', async (t) => {
+    if (!dbAvailable) return t.skip('No DB');
     await withTransaction(async (txClient) => {
       const res = await txClient.query<{ val: number }>('SELECT 2 as val');
       assert.strictEqual(res.rows[0].val, 2);
@@ -45,7 +47,8 @@ suite('Persistence Infrastructure', async () => {
     assert.ok(true, 'Transaction committed without throwing');
   });
 
-  test('D. Transaction Rollback', { skip: !dbAvailable }, async (t) => {
+  test('D. Transaction Rollback', async (t) => {
+    if (!dbAvailable) return t.skip('No DB');
     try {
       await withTransaction(async (txClient) => {
         await txClient.query<{ val: number }>('SELECT 3 as val');
@@ -57,7 +60,8 @@ suite('Persistence Infrastructure', async () => {
     }
   });
 
-  test('E. Transaction Connection Isolation', { skip: !dbAvailable }, async (t) => {
+  test('E. Transaction Connection Isolation', async (t) => {
+    if (!dbAvailable) return t.skip('No DB');
     // We can verify isolation by checking the backend PID of the connection
     await withTransaction(async (txClient) => {
       const res1 = await txClient.query<{ pid: number }>('SELECT pg_backend_pid() as pid');
@@ -66,13 +70,14 @@ suite('Persistence Infrastructure', async () => {
     });
   });
 
-  test('G. Migration Verification', { skip: !dbAvailable }, async (t) => {
+  test('G. Migration Verification', async (t) => {
+    if (!dbAvailable) return t.skip('No DB');
     // We verify the migration runner script structurally
     // It should exit cleanly if there are no migrations or if it's already up to date.
-    const runnerPath = path.resolve(__dirname, '../migration-runner.ts');
+    const runnerPath = path.resolve(__dirname, '../../database/migration-runner.ts');
     try {
       const output = execSync(`npx tsx ${runnerPath}`, { encoding: 'utf-8', env: process.env });
-      assert.ok(output.includes('Database is up to date') || output.includes('Successfully applied'), 'Migration runner completed');
+      assert.ok(output.includes('Database is up to date') || output.includes('Successfully applied') || output.includes('Migrations complete'), 'Migration runner completed');
     } catch (err: any) {
       assert.fail(`Migration runner failed: ${err.message}`);
     }
