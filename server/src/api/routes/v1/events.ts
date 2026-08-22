@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { requireAuth, requireRole } from '../middleware/auth.middleware.js';
+import { UserRole } from 'shared';
 import { EventController } from '../../controllers/event.controller.js';
 import { EvidenceController } from '../../controllers/evidence.controller.js';
 import { CreateEventService } from '../../../application/services/event/create-event.service.js';
@@ -28,9 +30,11 @@ const createEvidenceService = new CreateEvidenceService(evidenceRepo, eventRepo)
 const listEvidenceService = new ListEvidenceService(evidenceRepo, eventRepo);
 const evidenceController = new EvidenceController(createEvidenceService, listEvidenceService);
 
-eventsRouter.post('/', eventController.createEvent);
+eventsRouter.use(requireAuth);
+
+eventsRouter.post('/', requireRole([UserRole.ADMIN, UserRole.ANALYST, UserRole.DECISION_MAKER]), eventController.createEvent);
 eventsRouter.get('/:eventId', eventController.getEvent);
 eventsRouter.get('/', eventController.listEvents);
 
-eventsRouter.post('/:eventId/evidence', evidenceController.createEvidence);
+eventsRouter.post('/:eventId/evidence', requireRole([UserRole.ADMIN, UserRole.ANALYST, UserRole.DECISION_MAKER]), evidenceController.createEvidence);
 eventsRouter.get('/:eventId/evidence', evidenceController.listEvidence);

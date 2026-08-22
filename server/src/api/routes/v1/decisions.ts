@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { UserRole } from 'shared';
+import { requireAuth, requireRole } from '../middleware/auth.middleware.js';
 import { DecisionController } from '../../controllers/decision.controller.js';
 import { MakeDecisionApplicationService } from '../../../application/services/decision/make-decision.service.js';
 import { 
@@ -30,6 +32,8 @@ const makeDecisionService = new MakeDecisionApplicationService(
 );
 const decisionController = new DecisionController(makeDecisionService);
 
-decisionsRouter.post('/', decisionController.makeDecision);
+decisionsRouter.use(requireAuth);
+
+decisionsRouter.post('/', requireRole([UserRole.ADMIN, UserRole.DECISION_MAKER]), decisionController.makeDecision);
 
 // Mount point will typically be /recommendations/:recommendationId/decisions or /decisions

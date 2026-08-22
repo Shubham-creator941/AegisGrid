@@ -7,7 +7,8 @@ export class DecisionController {
   makeDecision = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const recommendation_id = req.params.recommendationId || req.body.recommendation_id;
-      const { decision_type, selected_response_id, reason, decided_by } = req.body;
+      const { decision_type, selected_response_id, reason } = req.body;
+      const decided_by = req.user?.id || req.body.decided_by;
 
       if (!recommendation_id || !decision_type || !reason || !decided_by) {
         return res.status(400).json({ error: 'Bad Request', message: 'Missing required fields' });

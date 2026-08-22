@@ -6,7 +6,9 @@ export class ScenarioController {
 
   createScenario = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, description, event_id, created_by } = req.body;
+      const { name, description, event_id } = req.body;
+      const created_by = req.user?.id || req.body.created_by;
+      
       if (!name || !description || !event_id || !created_by) {
         return res.status(400).json({ error: 'Bad Request', message: 'Missing required fields' });
       }
