@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout';
 import HomePage from '../pages/HomePage';
+import DecisionWorkspace from '../pages/DecisionWorkspace';
 
 const router = createBrowserRouter([
   {
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: 'scenarios/:scenarioId/evaluate',
+        element: <DecisionWorkspace />,
       },
     ],
   },

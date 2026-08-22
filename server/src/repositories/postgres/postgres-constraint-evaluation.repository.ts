@@ -79,4 +79,12 @@ export class PostgresConstraintEvaluationRepository implements ConstraintEvaluat
       }
     };
   }
+
+  async listByCandidateId(candidateId: string): Promise<ConstraintEvaluation[]> {
+    const result = await this.db.query<ConstraintEvaluation>(
+      'SELECT * FROM constraint_evaluations WHERE response_candidate_id = $1 ORDER BY evaluated_at ASC',
+      [candidateId]
+    );
+    return result.rows;
+  }
 }

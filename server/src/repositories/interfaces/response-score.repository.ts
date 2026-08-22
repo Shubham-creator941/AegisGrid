@@ -6,4 +6,5 @@ export interface ResponseScoreRepository {
   create(entity: Omit<ResponseScore, 'id' | 'created_at' | 'updated_at'>): Promise<ResponseScore>;
   update(id: string, entity: Partial<ResponseScore>): Promise<ResponseScore | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<ResponseScore>>;
+  listByCandidateId(candidateId: string): Promise<ResponseScore[]>;
 }

@@ -38,7 +38,7 @@ export class EventController {
         return res.status(400).json({ error: 'Bad Request', message: 'Missing event ID' });
       }
 
-      const event = await this.getEventService.execute({ event_id: eventId });
+      const event = await this.getEventService.execute({ event_id: eventId as string });
       
       if (!event) {
         return res.status(404).json({ error: 'Not Found', message: 'Event not found' });

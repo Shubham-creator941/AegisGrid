@@ -22,10 +22,11 @@ suite('ScenarioEvaluationService', () => {
 
   const mockOrchestrator = {
     evaluate: async () => ({
-      responses: [{ response_type: 'A', name: 'N', description: 'D', parameters: {}, status: 'ACTIVE' }],
+      responses: [{ id: 'cand-1', response_type: 'A', name: 'N', description: 'D', parameters: {}, status: 'ACTIVE' }],
       constraints: [{ response_candidate_id: 'cand-1', feasible: true, violations: [], constraint_version: '1.0' }],
       scores: [{ response_candidate_id: 'cand-1', overall_score: 95, dimension_scores: {}, weights: {}, scoring_version: '1.0' }],
-      recommendation: { response_candidate_id: 'cand-1', rank: 1, score: 95, rationale: '', tradeoffs: [], uncertainty: [], confidence: 0.9 }
+      recommendation: { response_candidate_id: 'cand-1', rank: 1, score: 95, rationale: '', tradeoffs: [], uncertainty: [], confidence: 0.9 },
+      impact: { supply_impact: 1, economic_impact: 1, operational_impact: 1, reserve_impact: 1, resilience_impact: 1, overall_impact: 1, calculation_version: '1.0' }
     })
   };
 
@@ -37,7 +38,7 @@ suite('ScenarioEvaluationService', () => {
     const service = new ScenarioEvaluationService(
       {} as any, { findById: async () => null } as any, {} as any, {} as any, 
       {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, 
-      {} as any, {} as any, mockTxManager as any
+      {} as any, {} as any, {} as any, mockTxManager as any
     );
     await assert.rejects(
       async () => service.evaluateScenario('scenario-1'),
@@ -50,7 +51,7 @@ suite('ScenarioEvaluationService', () => {
       { findById: async () => null } as any, 
       { findById: async () => mockScenario } as any, 
       {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, 
-      {} as any, {} as any, {} as any, {} as any, mockTxManager as any
+      {} as any, {} as any, {} as any, {} as any, {} as any, mockTxManager as any
     );
     await assert.rejects(
       async () => service.evaluateScenario('scenario-1'),
@@ -65,7 +66,7 @@ suite('ScenarioEvaluationService', () => {
       {} as any, 
       { findByEventId: async () => null } as any, 
       {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, 
-      {} as any, {} as any, mockTxManager as any
+      {} as any, {} as any, {} as any, mockTxManager as any
     );
     await assert.rejects(
       async () => service.evaluateScenario('scenario-1'),
@@ -96,7 +97,8 @@ suite('ScenarioEvaluationService', () => {
       { getLatestSnapshot: async () => mockNetworkSnapshot } as any, 
       { findByEventId: async () => mockRiskAssessment } as any, 
       { create: async (e: any) => { evalCreated = true; return { ...e, id: 'eval-1' }; } } as any, 
-      { create: async () => { candidateCreated = true; } } as any, 
+      { create: async () => {} } as any, // impact repo
+      { create: async () => { candidateCreated = true; return { id: 'cand-1' }; } } as any, 
       { create: async () => { constraintCreated = true; } } as any, 
       { create: async () => { scoreCreated = true; } } as any, 
       { create: async () => { recommendationCreated = true; } } as any, 

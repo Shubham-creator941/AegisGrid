@@ -6,4 +6,5 @@ export interface ConstraintEvaluationRepository {
   create(entity: Omit<ConstraintEvaluation, 'id' | 'created_at' | 'updated_at'>): Promise<ConstraintEvaluation>;
   update(id: string, entity: Partial<ConstraintEvaluation>): Promise<ConstraintEvaluation | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<ConstraintEvaluation>>;
+  listByCandidateId(candidateId: string): Promise<ConstraintEvaluation[]>;
 }

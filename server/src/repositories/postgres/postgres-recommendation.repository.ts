@@ -79,4 +79,12 @@ export class PostgresRecommendationRepository implements RecommendationRepositor
       }
     };
   }
+
+  async findByEvaluationId(evaluationId: string): Promise<Recommendation | null> {
+    const result = await this.db.query<Recommendation>(
+      'SELECT * FROM recommendations WHERE evaluation_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [evaluationId]
+    );
+    return result.rows[0] || null;
+  }
 }

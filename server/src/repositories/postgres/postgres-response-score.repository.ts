@@ -79,4 +79,12 @@ export class PostgresResponseScoreRepository implements ResponseScoreRepository 
       }
     };
   }
+
+  async listByCandidateId(candidateId: string): Promise<ResponseScore[]> {
+    const result = await this.db.query<ResponseScore>(
+      'SELECT * FROM response_scores WHERE response_candidate_id = $1 ORDER BY calculated_at ASC',
+      [candidateId]
+    );
+    return result.rows;
+  }
 }

@@ -6,4 +6,5 @@ export interface RecommendationRepository {
   create(entity: Omit<Recommendation, 'id' | 'created_at' | 'updated_at'>): Promise<Recommendation>;
   update(id: string, entity: Partial<Recommendation>): Promise<Recommendation | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<Recommendation>>;
+  findByEvaluationId(evaluationId: string): Promise<Recommendation | null>;
 }

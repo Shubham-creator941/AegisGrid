@@ -10,7 +10,7 @@ export class EvidenceController {
 
   createEvidence = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { eventId } = req.params;
+      const eventId = req.params.eventId as string;
       const { source_type, source_name, source_reference, content, published_at, retrieved_at, confidence } = req.body;
 
       if (!eventId || !source_type || !source_name || !source_reference || !content || !published_at || !retrieved_at || confidence === undefined) {
@@ -39,7 +39,7 @@ export class EvidenceController {
 
   listEvidence = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { eventId } = req.params;
+      const eventId = req.params.eventId as string;
       if (!eventId) {
         return res.status(400).json({ error: 'Bad Request', message: 'Missing event ID' });
       }

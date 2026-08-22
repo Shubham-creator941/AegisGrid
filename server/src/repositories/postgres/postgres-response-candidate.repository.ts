@@ -79,4 +79,12 @@ export class PostgresResponseCandidateRepository implements ResponseCandidateRep
       }
     };
   }
+
+  async listByEvaluationId(evaluationId: string): Promise<ResponseCandidate[]> {
+    const result = await this.db.query<ResponseCandidate>(
+      'SELECT * FROM response_candidates WHERE evaluation_id = $1 ORDER BY created_at ASC',
+      [evaluationId]
+    );
+    return result.rows;
+  }
 }

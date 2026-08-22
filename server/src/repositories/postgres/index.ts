@@ -16,3 +16,5 @@ export * from './postgres-recommendation.repository.js';
 export * from './postgres-decision.repository.js';
 export * from './postgres-audit-log.repository.js';
 export * from './postgres-network.repository.js';
+export * from './postgres-impact-assessment.repository.js';
+export * from './postgres-ai-analysis.repository.js';

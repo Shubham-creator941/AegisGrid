@@ -9,6 +9,7 @@ import { ResponseCandidateRepository } from '../../../repositories/interfaces/re
 import { ConstraintEvaluationRepository } from '../../../repositories/interfaces/constraint-evaluation.repository.js';
 import { ResponseScoreRepository } from '../../../repositories/interfaces/response-score.repository.js';
 import { RecommendationRepository } from '../../../repositories/interfaces/recommendation.repository.js';
+import { ImpactAssessmentRepository } from '../../../repositories/interfaces/impact-assessment.repository.js';
 
 import { EvaluationOrchestrator, EvaluationRequest } from './evaluation-orchestrator.js';
 import { TransactionManager } from '../../interfaces/transaction-manager.interface.js';
@@ -24,6 +25,7 @@ export class ScenarioEvaluationService {
     private networkRepo: NetworkRepository,
     private riskAssessmentRepo: RiskAssessmentRepository,
     private evaluationRepo: EvaluationRepository,
+    private impactRepo: ImpactAssessmentRepository,
     private candidateRepo: ResponseCandidateRepository,
     private constraintRepo: ConstraintEvaluationRepository,
     private scoreRepo: ResponseScoreRepository,
@@ -52,8 +54,7 @@ export class ScenarioEvaluationService {
 
       const riskAssessment = await this.riskAssessmentRepo.findByEventId(event.id);
       
-      const assumptionPage = await this.assumptionRepo.listByScenarioId(scenarioId, 1, 1000);
-      const assumptions = assumptionPage.data;
+      const assumptions = await this.assumptionRepo.listByScenarioId(scenarioId);
       
       const scenarioAgg = ScenarioAggregate.restore(scenarioEntity, assumptions);
 
@@ -86,8 +87,21 @@ export class ScenarioEvaluationService {
         engine_version: '1.0.0'
       });
       
+      await this.impactRepo.create({
+        evaluation_id: evaluation.id,
+        supply_impact: result.impact.supply_impact,
+        economic_impact: result.impact.economic_impact,
+        operational_impact: result.impact.operational_impact,
+        reserve_impact: result.impact.reserve_impact,
+        resilience_impact: result.impact.resilience_impact,
+        overall_impact: result.impact.overall_impact,
+        calculation_version: result.impact.calculation_version
+      });
+
+      const candidateIdMap = new Map<string, string>();
+      
       for (const candidate of result.responses) {
-        await this.candidateRepo.create({
+        const savedCandidate = await this.candidateRepo.create({
           evaluation_id: evaluation.id,
           response_type: candidate.response_type,
           name: candidate.name,
@@ -95,11 +109,13 @@ export class ScenarioEvaluationService {
           parameters: candidate.parameters,
           status: candidate.status
         });
+        candidateIdMap.set(candidate.id, savedCandidate.id);
       }
 
       for (const constraint of result.constraints) {
+        const dbCandidateId = candidateIdMap.get(constraint.response_candidate_id) || constraint.response_candidate_id;
         await this.constraintRepo.create({
-          response_candidate_id: constraint.response_candidate_id,
+          response_candidate_id: dbCandidateId,
           feasible: constraint.feasible,
           violations: constraint.violations,
           constraint_version: constraint.constraint_version,
@@ -108,8 +124,9 @@ export class ScenarioEvaluationService {
       }
 
       for (const score of result.scores) {
+        const dbCandidateId = candidateIdMap.get(score.response_candidate_id) || score.response_candidate_id;
         await this.scoreRepo.create({
-          response_candidate_id: score.response_candidate_id,
+          response_candidate_id: dbCandidateId,
           overall_score: score.overall_score,
           dimension_scores: score.dimension_scores,
           weights: score.weights,
@@ -119,9 +136,10 @@ export class ScenarioEvaluationService {
       }
 
       if (result.recommendation) {
+        const dbCandidateId = candidateIdMap.get(result.recommendation.response_candidate_id) || result.recommendation.response_candidate_id;
         await this.recommendationRepo.create({
           evaluation_id: evaluation.id,
-          response_candidate_id: result.recommendation.response_candidate_id,
+          response_candidate_id: dbCandidateId,
           rank: result.recommendation.rank,
           score: result.recommendation.score,
           rationale: result.recommendation.rationale,
