@@ -8,6 +8,8 @@ import { EvaluationRepository } from '../../../repositories/interfaces/evaluatio
 import { AuditLogRepository } from '../../../repositories/interfaces/audit-log.repository.js';
 import { ScenarioAggregate } from '../../../domain/aggregates/scenario.aggregate.js';
 import { BusinessRuleError } from '../../../domain/errors/index.js';
+import { ResponseCandidateRepository } from '../../../repositories/interfaces/response-candidate.repository.js';
+import { ConstraintEvaluationRepository } from '../../../repositories/interfaces/constraint-evaluation.repository.js';
 
 export interface MakeDecisionInput {
   recommendation_id: string;
@@ -24,6 +26,8 @@ export class MakeDecisionApplicationService {
     private evaluationRepo: EvaluationRepository,
     private scenarioRepo: ScenarioRepository,
     private auditLogRepo: AuditLogRepository,
+    private candidateRepo: ResponseCandidateRepository,
+    private constraintRepo: ConstraintEvaluationRepository,
     private transactionManager: TransactionManager
   ) {}
 
@@ -46,13 +50,47 @@ export class MakeDecisionApplicationService {
         throw new BusinessRuleError('SCENARIO_NOT_FOUND', 'Scenario not found');
       }
 
+      const isModify = input.decision_type === 'MODIFY';
+      const isAccept = input.decision_type === 'ACCEPT';
+      const isReject = input.decision_type === 'REJECT';
+
+      if (isReject && !input.reason) {
+        throw new BusinessRuleError('RATIONALE_REQUIRED', 'Rationale is required for REJECT decision');
+      }
+
+      if (isModify && !input.selected_response_id) {
+        throw new BusinessRuleError('SELECTED_RESPONSE_REQUIRED', 'Selected response ID is required for MODIFY decision');
+      }
+
+      const finalSelectedResponseId = input.selected_response_id || recommendation.response_candidate_id;
+
+      if (isAccept && finalSelectedResponseId !== recommendation.response_candidate_id) {
+        throw new BusinessRuleError('INVALID_SELECTED_RESPONSE', 'Selected response must equal recommended response for ACCEPT decision');
+      }
+
+      if (isAccept || isModify) {
+        const candidate = await this.candidateRepo.findById(finalSelectedResponseId);
+        if (!candidate) {
+          throw new BusinessRuleError('CANDIDATE_NOT_FOUND', 'Selected response candidate not found');
+        }
+        if (candidate.evaluation_id !== evaluation.id) {
+          throw new BusinessRuleError('INVALID_CANDIDATE', 'Selected response candidate does not belong to the same evaluation');
+        }
+
+        const constraints = await this.constraintRepo.listByCandidateId(finalSelectedResponseId);
+        const isFeasible = constraints.length > 0 && constraints.every(c => c.feasible);
+        if (!isFeasible) {
+          throw new BusinessRuleError('INFEASIBLE_RESPONSE', 'Selected response is not feasible');
+        }
+      }
+
       const newDecision: Omit<Decision, 'id' | 'created_at' | 'updated_at'> = {
         recommendation_id: input.recommendation_id,
         decision_type: input.decision_type as any,
-        selected_response_id: input.selected_response_id || recommendation.response_candidate_id,
+        selected_response_id: finalSelectedResponseId,
         reason: input.reason,
         decided_by: input.decided_by,
-        modification_notes: input.decision_type === 'MODIFY' ? input.reason : null,
+        modification_notes: isModify ? input.reason : null,
         decided_at: new Date()
       };
 

@@ -39,6 +39,14 @@ test('MakeDecisionApplicationService', async (t) => {
       update: async () => ({})
     } as any;
 
+    const mockCandidateRepo = {
+      findById: async (id: string) => ({ id, evaluation_id: 'e-1' })
+    } as any;
+
+    const mockConstraintRepo = {
+      listByCandidateId: async () => [{ feasible: true }]
+    } as any;
+    
     const mockAuditLogRepo = {
       create: async () => ({})
     } as any;
@@ -49,6 +57,8 @@ test('MakeDecisionApplicationService', async (t) => {
       mockEvaluationRepo,
       mockScenarioRepo,
       mockAuditLogRepo,
+      mockCandidateRepo,
+      mockConstraintRepo,
       mockTxManager
     );
 
@@ -77,6 +87,8 @@ test('MakeDecisionApplicationService', async (t) => {
     const mockEvaluationRepo = {} as any;
     const mockScenarioRepo = {} as any;
     const mockAuditLogRepo = {} as any;
+    const mockCandidateRepo = {} as any;
+    const mockConstraintRepo = {} as any;
 
     const service = new MakeDecisionApplicationService(
       mockDecisionRepo,
@@ -84,6 +96,8 @@ test('MakeDecisionApplicationService', async (t) => {
       mockEvaluationRepo,
       mockScenarioRepo,
       mockAuditLogRepo,
+      mockCandidateRepo,
+      mockConstraintRepo,
       mockTxManager
     );
 

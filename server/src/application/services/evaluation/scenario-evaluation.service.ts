@@ -35,7 +35,7 @@ export class ScenarioEvaluationService {
   ) {}
 
   async evaluateScenario(scenarioId: string): Promise<any> {
-    return this.txManager.execute(async () => {
+    const res = await this.txManager.execute(async () => {
       const scenarioEntity = await this.scenarioRepo.findById(scenarioId);
       if (!scenarioEntity) {
         throw new BusinessRuleError('SCENARIO_NOT_FOUND', `Scenario ${scenarioId} not found`);

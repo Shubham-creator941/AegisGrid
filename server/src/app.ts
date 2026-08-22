@@ -10,6 +10,7 @@ import { supplyFlowsRouter } from './api/routes/v1/supply-flows.js';
 import { scenariosRouter } from './api/routes/v1/scenarios.js';
 import { decisionsRouter } from './api/routes/v1/decisions.js';
 import { evaluationsRouter } from './api/routes/v1/evaluations.js';
+import { auditRouter } from './api/routes/v1/audit.js';
 import { createAuthRoutes } from './api/routes/v1/auth.routes.js';
 import { AuthApplicationService } from './application/services/auth/auth.service.js';
 import { PostgresUserRepository } from './repositories/postgres/postgres-user.repository.js';
@@ -36,8 +37,8 @@ export function createApp(): Express {
   app.use('/api/v1/events', eventsRouter);
   app.use('/api/v1/scenarios', scenariosRouter);
   app.use('/api/v1/evaluations', evaluationsRouter);
-  app.use('/api/v1/decisions', decisionsRouter);
-  app.use('/api/v1/recommendations/:recommendationId/decisions', decisionsRouter); // Convenience sub-resource
+  app.use('/api/v1/recommendations', decisionsRouter);
+  app.use('/api/v1/audit', auditRouter);
 
   // Error Boundary
   app.use(errorHandler);

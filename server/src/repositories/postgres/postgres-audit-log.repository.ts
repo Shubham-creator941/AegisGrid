@@ -1,4 +1,4 @@
-import { AuditLogRepository } from '../interfaces/audit-log.repository.js';
+import { AuditLogRepository, AuditLogFilter } from '../interfaces/audit-log.repository.js';
 import { AuditLog } from '../../domain/entities/index.js';
 import { DatabaseClient } from '../../infrastructure/database/client.js';
 import { PaginatedResult } from 'shared/src/api/pagination.js';
@@ -58,14 +58,40 @@ export class PostgresAuditLogRepository implements AuditLogRepository {
     return result.rows[0] || null;
   }
 
-  async list(page: number, pageSize: number): Promise<PaginatedResult<AuditLog>> {
+  async list(page: number, pageSize: number, filters?: AuditLogFilter): Promise<PaginatedResult<AuditLog>> {
     const offset = (page - 1) * pageSize;
+    
+    let whereClauses: string[] = [];
+    let values: any[] = [];
+    let queryIndex = 1;
+
+    if (filters) {
+      if (filters.actor_id) {
+        whereClauses.push(`actor_id = $${queryIndex++}`);
+        values.push(filters.actor_id);
+      }
+      if (filters.action) {
+        whereClauses.push(`action = $${queryIndex++}`);
+        values.push(filters.action);
+      }
+      if (filters.entity_type) {
+        whereClauses.push(`entity_type = $${queryIndex++}`);
+        values.push(filters.entity_type);
+      }
+      if (filters.entity_id) {
+        whereClauses.push(`entity_id = $${queryIndex++}`);
+        values.push(filters.entity_id);
+      }
+    }
+
+    const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    
     const [dataResult, countResult] = await Promise.all([
       this.db.query<AuditLog>(
-        'SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT $1 OFFSET $2',
-        [pageSize, offset]
+        `SELECT * FROM audit_logs ${whereString} ORDER BY created_at DESC LIMIT $${queryIndex} OFFSET $${queryIndex + 1}`,
+        [...values, pageSize, offset]
       ),
-      this.db.query<{count: string}>('SELECT COUNT(*) FROM audit_logs')
+      this.db.query<{count: string}>(`SELECT COUNT(*) FROM audit_logs ${whereString}`, values)
     ]);
     
     const total = parseInt(countResult.rows[0].count, 10);
