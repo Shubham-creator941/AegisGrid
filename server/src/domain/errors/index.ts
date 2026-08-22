@@ -21,3 +21,13 @@ export class BusinessRuleError extends Error {
     this.name = 'BusinessRuleError';
   }
 }
+
+export class AuthenticationError extends Error {
+  constructor(
+    public readonly code: string,
+    message: string
+  ) {
+    super(message);
+    this.name = 'AuthenticationError';
+  }
+}

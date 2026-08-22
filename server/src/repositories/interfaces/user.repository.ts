@@ -6,4 +6,5 @@ export interface UserRepository {
   create(entity: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User>;
   update(id: string, entity: Partial<User>): Promise<User | null>;
   list(page: number, pageSize: number): Promise<PaginatedResult<User>>;
+  findByEmail(email: string): Promise<User | null>;
 }

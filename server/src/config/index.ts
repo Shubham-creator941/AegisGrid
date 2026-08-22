@@ -9,5 +9,9 @@ export const config = {
   ai: {
     provider: process.env.AI_PROVIDER || 'mock',
     apiKey: process.env.AI_API_KEY || '',
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET || 'fallback-secret-for-development-only',
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h'
   }
 };

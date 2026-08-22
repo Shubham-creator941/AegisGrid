@@ -92,7 +92,7 @@ suite('ScenarioEvaluationService', () => {
           scenarioUpdated = true;
         }
       } as any, 
-      { listByScenarioId: async () => ({ data: [] }) } as any, 
+      { listByScenarioId: async () => [] } as any, 
       { findByEventId: async () => mockAnalysis } as any, 
       { getLatestSnapshot: async () => mockNetworkSnapshot } as any, 
       { findByEventId: async () => mockRiskAssessment } as any, 

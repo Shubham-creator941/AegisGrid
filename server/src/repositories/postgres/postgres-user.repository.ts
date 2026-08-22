@@ -79,4 +79,12 @@ export class PostgresUserRepository implements UserRepository {
       }
     };
   }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const result = await this.db.query<User>(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+    return result.rows[0] || null;
+  }
 }

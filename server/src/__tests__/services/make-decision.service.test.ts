@@ -10,6 +10,8 @@ test('MakeDecisionApplicationService', async (t) => {
     };
 
     const mockDecisionRepo = {
+      findById: async () => null,
+      findByRecommendationId: async () => null,
       create: async (data: any) => ({ ...data, id: 'd-123' })
     } as any;
 

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { InvalidStateTransitionError, BusinessRuleError } from '../../domain/errors/index.js';
+import { InvalidStateTransitionError, BusinessRuleError, AuthenticationError } from '../../domain/errors/index.js';
 
 export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
   if (err instanceof InvalidStateTransitionError) {
@@ -15,6 +15,16 @@ export function errorHandler(err: Error, req: Request, res: Response, next: Next
       error: 'Unprocessable Entity',
       message: err.message,
       code: err.code
+    });
+  }
+
+  if (err instanceof AuthenticationError) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: err.code,
+        message: err.message
+      }
     });
   }
 
