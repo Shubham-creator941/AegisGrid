@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\"",
-    "migrate": "tsx src/infrastructure/database/migration-runner.ts"
+    "migrate": "tsx src/infrastructure/database/migration-runner.ts",
+    "db:seed": "tsx src/infrastructure/database/seed/run-seed.ts"
   },
   "keywords": [],
   "author": "",
