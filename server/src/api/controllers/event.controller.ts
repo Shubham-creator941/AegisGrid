@@ -2,12 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 import { CreateEventService } from '../../application/services/event/create-event.service.js';
 import { GetEventService } from '../../application/services/event/get-event.service.js';
 import { ListEventsService } from '../../application/services/event/list-events.service.js';
+import { EventAnalysisService } from '../../application/services/analysis/event-analysis.service.js';
+import { CreateRiskAssessmentService } from '../../application/services/risk-assessment/create-risk-assessment.service.js';
 
 export class EventController {
   constructor(
     private createEventService: CreateEventService,
     private getEventService: GetEventService,
-    private listEventsService: ListEventsService
+    private listEventsService: ListEventsService,
+    private eventAnalysisService?: EventAnalysisService,
+    private createRiskAssessmentService?: CreateRiskAssessmentService
   ) {}
 
   createEvent = async (req: Request, res: Response, next: NextFunction) => {
@@ -58,6 +62,50 @@ export class EventController {
       const result = await this.listEventsService.execute({ page, pageSize });
       
       res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  analyzeEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!this.eventAnalysisService) throw new Error('Service not configured');
+      const eventId = (req.params.eventId || req.params.id) as string;
+      const analysis = await this.eventAnalysisService.analyzeEvent(eventId);
+      res.status(200).json(analysis);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  createRiskAssessment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!this.createRiskAssessmentService) throw new Error('Service not configured');
+      const eventId = (req.params.eventId || req.params.id) as string;
+      
+      const {
+        probability,
+        severity,
+        exposure,
+        confidence,
+        risk_level,
+        assessment_basis
+      } = req.body;
+      
+      const userId = (req as any).user?.id || 'system';
+
+      const assessment = await this.createRiskAssessmentService.execute({
+        event_id: eventId,
+        probability,
+        severity,
+        exposure,
+        confidence,
+        risk_level,
+        assessment_basis,
+        created_by: userId
+      });
+
+      res.status(201).json(assessment);
     } catch (err) {
       next(err);
     }

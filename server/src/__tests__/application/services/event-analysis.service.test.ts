@@ -4,6 +4,7 @@ import { EventAnalysisService } from '../../../application/services/analysis/eve
 import { BusinessRuleError } from '../../../domain/errors/index.js';
 import { Event, Evidence, AIAnalysis } from '../../../domain/entities/index.js';
 import { PaginatedResult } from 'shared/src/api/pagination.js';
+import { EventState } from 'shared';
 
 suite('EventAnalysisService', () => {
   const mockEvent: Event = {
@@ -12,7 +13,7 @@ suite('EventAnalysisService', () => {
     description: 'Test Event',
     event_type: 'WEATHER' as any,
     severity: 'HIGH' as any,
-    status: 'DETECTED' as any,
+    status: EventState.OPEN,
     affected_region: 'US',
     occurred_at: new Date(),
     detected_at: new Date(), 
@@ -101,7 +102,13 @@ suite('EventAnalysisService', () => {
   });
 
   test('valid AI response creates correct entity and persists', async () => {
-    const eventRepo = { findById: async () => mockEvent } as any;
+    let savedAnalysis: any;
+    let savedEvent: any;
+    
+    const eventRepo = { 
+      findById: async () => mockEvent,
+      update: async (id: string, data: any) => { savedEvent = data; return { ...mockEvent, ...data }; }
+    } as any;
     const evidenceRepo = { listByEventId: async () => ({ data: [mockEvidence], meta: {} }) } as any;
     
     const aiAdapter = {
@@ -136,7 +143,13 @@ suite('EventAnalysisService', () => {
   });
 
   test('subsequent valid AI response increments version', async () => {
-    const eventRepo = { findById: async () => mockEvent } as any;
+    let savedAnalysis: any;
+    let savedEvent: any;
+    
+    const eventRepo = { 
+      findById: async () => mockEvent,
+      update: async (id: string, data: any) => { savedEvent = data; return { ...mockEvent, ...data }; }
+    } as any;
     const evidenceRepo = { listByEventId: async () => ({ data: [], meta: {} }) } as any;
     
     const aiAdapter = {

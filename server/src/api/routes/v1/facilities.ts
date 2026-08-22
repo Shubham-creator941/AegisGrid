@@ -21,7 +21,7 @@ const controller = new FacilityController(createService, getService, listService
 
 facilitiesRouter.use(requireAuth);
 
-facilitiesRouter.post('/', requireRole(UserRole.ADMIN), controller.createFacility);
+facilitiesRouter.post('/', requireRole([UserRole.ADMIN]), controller.createFacility);
 facilitiesRouter.get('/', controller.listFacilities);
 facilitiesRouter.get('/:id', controller.getFacility);
-facilitiesRouter.patch('/:id', requireRole(UserRole.ADMIN), controller.updateFacility);
+facilitiesRouter.patch('/:id', requireRole([UserRole.ADMIN]), controller.updateFacility);

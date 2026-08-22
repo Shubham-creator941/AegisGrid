@@ -26,6 +26,9 @@ export class EventAnalysisService {
       const evidencePage = await this.evidenceRepository.listByEventId(eventId, 1, 100);
       const evidence = evidencePage.data;
 
+      const aggregate = (await import('../../../domain/aggregates/event.aggregate.js')).EventAggregate.restore(event, evidence);
+      aggregate.markAnalyzed();
+
       let aiResponse;
       try {
         aiResponse = await this.aiAdapter.analyze({ event, evidence });
@@ -50,6 +53,7 @@ export class EventAnalysisService {
       }
 
       const persisted = await this.aiAnalysisRepository.create(newAnalysis);
+      await this.eventRepository.update(eventId, { status: aggregate.status });
 
       return persisted;
     });

@@ -21,7 +21,7 @@ const controller = new CorridorController(createService, getService, listService
 
 corridorsRouter.use(requireAuth);
 
-corridorsRouter.post('/', requireRole(UserRole.ADMIN), controller.createCorridor);
+corridorsRouter.post('/', requireRole([UserRole.ADMIN]), controller.createCorridor);
 corridorsRouter.get('/', controller.listCorridors);
 corridorsRouter.get('/:id', controller.getCorridor);
-corridorsRouter.patch('/:id', requireRole(UserRole.ADMIN), controller.updateCorridor);
+corridorsRouter.patch('/:id', requireRole([UserRole.ADMIN]), controller.updateCorridor);
