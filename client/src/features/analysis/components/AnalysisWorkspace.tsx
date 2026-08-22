@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BrainCircuit, Target, Shield, AlertTriangle, Play, Database, RefreshCw } from 'lucide-react';
 import { useAIAnalysis, useRiskAssessment } from '../../events/hooks/useEvents';
 import { EventsApi } from '../../events/api/events.api';
@@ -9,6 +10,7 @@ interface AnalysisWorkspaceProps {
 }
 
 export function AnalysisWorkspace({ event }: AnalysisWorkspaceProps) {
+  const navigate = useNavigate();
   const { data: analysis, loading: analysisLoading, error: analysisError } = useAIAnalysis(event.id);
   const { data: risk, loading: riskLoading, error: riskError } = useRiskAssessment(event.id);
 
@@ -201,14 +203,13 @@ export function AnalysisWorkspace({ event }: AnalysisWorkspaceProps) {
 
         {/* Primary CTA */}
         <div className="mt-auto pt-6">
-          <button 
-            disabled
-            className="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-400 py-3 rounded-lg text-sm font-semibold opacity-60 cursor-not-allowed"
+          <button
+            onClick={() => navigate(`/app/scenarios?eventId=${event.id}`)}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded font-medium transition-colors"
           >
             <Shield size={16} />
             Generate Response Scenarios
           </button>
-          <p className="text-center text-[10px] text-slate-500 mt-2">Scenario generation not yet available</p>
         </div>
       </div>
     );
