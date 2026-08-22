@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { requireAuth } from '../../middleware/auth.middleware.js';
+import { requireAuth, requireRole } from '../../middleware/auth.middleware.js';
+import { UserRole } from 'shared';
 import { EvaluationController } from '../../controllers/evaluation.controller.js';
 import { GetEvaluationService } from '../../../application/services/evaluation/get-evaluation.service.js';
 import { ScenarioEvaluationService } from '../../../application/services/evaluation/scenario-evaluation.service.js';
@@ -89,9 +90,11 @@ const evaluationController = new EvaluationController(
 
 evaluationsRouter.use(requireAuth);
 
-evaluationsRouter.get('/:id', evaluationController.getEvaluationStatus);
-evaluationsRouter.get('/:id/result', evaluationController.getEvaluationResult);
-evaluationsRouter.get('/:id/recommendation', evaluationController.getEvaluationRecommendation);
+const evaluationRoles = requireRole([UserRole.ADMIN, UserRole.ANALYST, UserRole.DECISION_MAKER]);
+
+evaluationsRouter.get('/:id', evaluationRoles, evaluationController.getEvaluationStatus);
+evaluationsRouter.get('/:id/result', evaluationRoles, evaluationController.getEvaluationResult);
+evaluationsRouter.get('/:id/recommendation', evaluationRoles, evaluationController.getEvaluationRecommendation);
 
 // Also need to mount POST /api/v1/scenarios/:id/evaluate but it belongs to scenarios.ts conceptually or can be exported from here to be used in scenarios.ts
 export const evaluateScenarioHandler = evaluationController.evaluateScenario;

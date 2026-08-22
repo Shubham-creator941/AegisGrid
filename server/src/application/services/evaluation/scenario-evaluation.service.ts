@@ -75,17 +75,27 @@ export class ScenarioEvaluationService {
         assumptions: scenarioAgg.currentAssumptions as any
       };
 
-      const result = await this.orchestrator.evaluate(request);
-
       const evaluation = await this.evaluationRepo.create({
         scenario_id: scenarioId,
         network_snapshot_id: networkSnapshot.id,
         risk_assessment_id: riskAssessment ? riskAssessment.id : 'none',
-        status: 'COMPLETED' as any,
+        status: 'RUNNING' as any,
         started_at: new Date(),
-        completed_at: new Date(),
+        completed_at: null,
         engine_version: '1.0.0'
       });
+
+      let result: any;
+      try {
+        result = await this.orchestrator.evaluate(request);
+      } catch (err) {
+        await this.evaluationRepo.update(evaluation.id, { status: 'FAILED' as any, completed_at: new Date() });
+        scenarioAgg.fail();
+        await this.scenarioRepo.update(scenarioId, { status: scenarioAgg.currentScenario.status });
+        return { evaluation, failed: true, error: err };
+      }
+
+      await this.evaluationRepo.update(evaluation.id, { status: 'COMPLETED' as any, completed_at: new Date() });
       
       await this.impactRepo.create({
         evaluation_id: evaluation.id,
@@ -160,5 +170,11 @@ export class ScenarioEvaluationService {
         result
       };
     });
+    
+    if (res.failed) {
+      throw new BusinessRuleError('EVALUATION_FAILED', 'Scenario evaluation failed.', { evaluation_id: res.evaluation.id });
+    }
+
+    return res;
   }
 }

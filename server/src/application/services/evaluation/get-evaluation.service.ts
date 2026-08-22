@@ -59,10 +59,38 @@ export class GetEvaluationService {
   }
 
   async getRecommendation(id: string) {
+    const evaluation = await this.evaluationRepo.findById(id);
+    if (!evaluation) {
+      throw new BusinessRuleError('EVALUATION_NOT_FOUND', `Evaluation ${id} not found`);
+    }
+
+    if (evaluation.status !== 'COMPLETED') {
+      throw new BusinessRuleError('EVALUATION_INCOMPLETE', `Evaluation ${id} is not COMPLETED`);
+    }
+
     const recommendation = await this.recommendationRepo.findByEvaluationId(id);
     if (!recommendation) {
       throw new BusinessRuleError('RECOMMENDATION_NOT_FOUND', `Recommendation for evaluation ${id} not found`);
     }
-    return recommendation;
+
+    const candidate = await this.candidateRepo.findById(recommendation.response_candidate_id);
+    if (!candidate) {
+      throw new BusinessRuleError('INVALID_RECOMMENDATION', `Recommended response candidate ${recommendation.response_candidate_id} not found`);
+    }
+
+    if (candidate.status !== 'FEASIBLE') {
+      throw new BusinessRuleError('INVALID_RECOMMENDATION', `Recommended response candidate is not feasible`);
+    }
+
+    return {
+      id: recommendation.id,
+      evaluation_id: recommendation.evaluation_id,
+      recommended_response: candidate,
+      score: recommendation.score,
+      confidence: recommendation.confidence,
+      rationale: recommendation.rationale,
+      tradeoffs: recommendation.tradeoffs || [],
+      uncertainty: recommendation.uncertainty || []
+    };
   }
 }

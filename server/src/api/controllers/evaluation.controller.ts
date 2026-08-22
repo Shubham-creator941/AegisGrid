@@ -9,10 +9,40 @@ export class EvaluationController {
     private getEvaluationService: GetEvaluationService
   ) {}
 
+  // In-memory idempotency store for MVP since no persistence table exists for it.
+  // The gap is reported: Idempotency keys need a database table to survive restarts.
+  private idempotencyStore = new Map<string, { requestHash: string, result: any }>();
+
   evaluateScenario = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const scenarioId = req.params.id as string;
+      const idempotencyKey = req.headers['idempotency-key'] as string || req.body.idempotency_key;
+
+      if (idempotencyKey) {
+        // Simple hash of the request (just the scenario ID for now)
+        const requestHash = scenarioId;
+        
+        if (this.idempotencyStore.has(idempotencyKey)) {
+          const cached = this.idempotencyStore.get(idempotencyKey)!;
+          if (cached.requestHash !== requestHash) {
+            return res.status(409).json({
+              success: false,
+              error: {
+                code: 'IDEMPOTENCY_KEY_REUSED',
+                message: 'Idempotency key reused with a different request.'
+              }
+            });
+          }
+          return res.status(200).json({ success: true, data: cached.result });
+        }
+      }
+
       const result = await this.scenarioEvaluationService.evaluateScenario(scenarioId);
+      
+      if (idempotencyKey) {
+        this.idempotencyStore.set(idempotencyKey, { requestHash: scenarioId, result });
+      }
+
       res.status(200).json({ success: true, data: result });
     } catch (err) {
       next(err);

@@ -96,7 +96,10 @@ suite('ScenarioEvaluationService', () => {
       { findByEventId: async () => mockAnalysis } as any, 
       { getLatestSnapshot: async () => mockNetworkSnapshot } as any, 
       { findByEventId: async () => mockRiskAssessment } as any, 
-      { create: async (e: any) => { evalCreated = true; return { ...e, id: 'eval-1' }; } } as any, 
+      { 
+        create: async (e: any) => { evalCreated = true; return { ...e, id: 'eval-1' }; },
+        update: async (id: string, e: any) => {}
+      } as any, 
       { create: async () => {} } as any, // impact repo
       { create: async () => { candidateCreated = true; return { id: 'cand-1' }; } } as any, 
       { create: async () => { constraintCreated = true; } } as any, 
