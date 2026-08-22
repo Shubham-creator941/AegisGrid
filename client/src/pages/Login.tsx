@@ -27,7 +27,8 @@ export default function Login() {
         password,
       });
 
-      login(response.data.token, response.data.user);
+      const { access_token, user } = response.data.data;
+      login(access_token, user);
       navigate(from, { replace: true });
     } catch (err: any) {
       if (err.response?.status === 401) {
