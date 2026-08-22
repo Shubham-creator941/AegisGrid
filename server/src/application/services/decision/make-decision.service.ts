@@ -3,6 +3,11 @@ import { RecommendationRepository } from '../../../repositories/interfaces/recom
 import { Decision } from '../../../domain/entities/index.js';
 import { DecisionService } from '../../../domain/services/decision.service.js';
 import { TransactionManager } from '../../interfaces/transaction-manager.interface.js';
+import { ScenarioRepository } from '../../../repositories/interfaces/scenario.repository.js';
+import { EvaluationRepository } from '../../../repositories/interfaces/evaluation.repository.js';
+import { AuditLogRepository } from '../../../repositories/interfaces/audit-log.repository.js';
+import { ScenarioAggregate } from '../../../domain/aggregates/scenario.aggregate.js';
+import { BusinessRuleError } from '../../../domain/errors/index.js';
 
 export interface MakeDecisionInput {
   recommendation_id: string;
@@ -16,6 +21,9 @@ export class MakeDecisionApplicationService {
   constructor(
     private decisionRepo: DecisionRepository,
     private recommendationRepo: RecommendationRepository,
+    private evaluationRepo: EvaluationRepository,
+    private scenarioRepo: ScenarioRepository,
+    private auditLogRepo: AuditLogRepository,
     private transactionManager: TransactionManager
   ) {}
 
@@ -23,13 +31,21 @@ export class MakeDecisionApplicationService {
     return this.transactionManager.execute(async () => {
       const recommendation = await this.recommendationRepo.findById(input.recommendation_id);
       if (!recommendation) {
-        throw new Error('Recommendation not found');
+        throw new BusinessRuleError('RECOMMENDATION_NOT_FOUND', 'Recommendation not found');
       }
 
-      // We need to fetch existing decisions for this recommendation to enforce the rule
-      // But for simplicity in this MVP, we assume the domain service handles it if we pass existing decisions.
-      // Wait, DecisionService in domain layer handles uniqueness.
+      const existingDecision = await this.decisionRepo.findByRecommendationId(input.recommendation_id);
       
+      const evaluation = await this.evaluationRepo.findById(recommendation.evaluation_id);
+      if (!evaluation) {
+        throw new BusinessRuleError('EVALUATION_NOT_FOUND', 'Evaluation not found');
+      }
+
+      const scenarioEntity = await this.scenarioRepo.findById(evaluation.scenario_id);
+      if (!scenarioEntity) {
+        throw new BusinessRuleError('SCENARIO_NOT_FOUND', 'Scenario not found');
+      }
+
       const newDecision: Omit<Decision, 'id' | 'created_at' | 'updated_at'> = {
         recommendation_id: input.recommendation_id,
         decision_type: input.decision_type as any,
@@ -43,14 +59,35 @@ export class MakeDecisionApplicationService {
       // Validate through domain
       DecisionService.createDecision(
         recommendation, 
-        false, 
+        !!existingDecision, 
         input.decision_type as any, 
         input.decided_by, 
         input.reason, 
         input.decision_type === 'MODIFY' ? input.reason : null
       );
 
-      return await this.decisionRepo.create(newDecision as any);
+      // Restore Scenario and transition
+      const scenarioAgg = ScenarioAggregate.restore(scenarioEntity, []);
+      scenarioAgg.decide();
+      
+      await this.scenarioRepo.update(scenarioEntity.id, { status: scenarioAgg.status });
+      const savedDecision = await this.decisionRepo.create(newDecision as any);
+
+      await this.auditLogRepo.create({
+        actor_id: input.decided_by,
+        action: `DECISION_${input.decision_type}`,
+        entity_type: 'SCENARIO',
+        entity_id: scenarioEntity.id,
+        before_state: scenarioEntity.status,
+        after_state: scenarioAgg.status,
+        metadata: {
+          decision_id: savedDecision.id,
+          recommendation_id: recommendation.id,
+          reason: input.reason
+        }
+      });
+
+      return savedDecision;
     });
   }
 }

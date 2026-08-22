@@ -79,4 +79,12 @@ export class PostgresDecisionRepository implements DecisionRepository {
       }
     };
   }
+
+  async findByRecommendationId(recommendationId: string): Promise<Decision | null> {
+    const result = await this.db.query<Decision>(
+      'SELECT * FROM human_decisions WHERE recommendation_id = $1 ORDER BY decided_at DESC LIMIT 1',
+      [recommendationId]
+    );
+    return result.rows[0] || null;
+  }
 }
