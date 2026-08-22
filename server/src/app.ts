@@ -4,6 +4,8 @@ import { healthRouter } from './api/routes/health.js';
 import { errorHandler } from './api/middleware/error.js';
 import { eventsRouter } from './api/routes/v1/events.js';
 import { suppliersRouter } from './api/routes/v1/suppliers.js';
+import { facilitiesRouter } from './api/routes/v1/facilities.js';
+import { corridorsRouter } from './api/routes/v1/corridors.js';
 import { scenariosRouter } from './api/routes/v1/scenarios.js';
 import { decisionsRouter } from './api/routes/v1/decisions.js';
 import { evaluationsRouter } from './api/routes/v1/evaluations.js';
@@ -27,6 +29,8 @@ export function createApp(): Express {
   app.use('/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/suppliers', suppliersRouter);
+  app.use('/api/v1/facilities', facilitiesRouter);
+  app.use('/api/v1/corridors', corridorsRouter);
   app.use('/api/v1/events', eventsRouter);
   app.use('/api/v1/scenarios', scenariosRouter);
   app.use('/api/v1/evaluations', evaluationsRouter);

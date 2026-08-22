@@ -15,6 +15,14 @@ export class PostgresCorridorRepository implements CorridorRepository {
     return result.rows[0] || null;
   }
 
+  async findByName(name: string): Promise<Corridor | null> {
+    const result = await this.db.query<Corridor>(
+      'SELECT * FROM corridors WHERE name = $1',
+      [name]
+    );
+    return result.rows[0] || null;
+  }
+
   async create(entity: Omit<Corridor, 'id' | 'created_at' | 'updated_at'>): Promise<Corridor> {
     const id = randomUUID();
     const keys = Object.keys(entity);
@@ -58,14 +66,24 @@ export class PostgresCorridorRepository implements CorridorRepository {
     return result.rows[0] || null;
   }
 
-  async list(page: number, pageSize: number): Promise<PaginatedResult<Corridor>> {
+  async list(page: number, pageSize: number, status?: string): Promise<PaginatedResult<Corridor>> {
     const offset = (page - 1) * pageSize;
+    
+    let dataQuery = 'SELECT * FROM corridors';
+    let countQuery = 'SELECT COUNT(*) FROM corridors';
+    const params: any[] = [];
+    
+    if (status) {
+      dataQuery += ' WHERE status = $1';
+      countQuery += ' WHERE status = $1';
+      params.push(status);
+    }
+    
+    dataQuery += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    
     const [dataResult, countResult] = await Promise.all([
-      this.db.query<Corridor>(
-        'SELECT * FROM corridors ORDER BY created_at DESC LIMIT $1 OFFSET $2',
-        [pageSize, offset]
-      ),
-      this.db.query<{count: string}>('SELECT COUNT(*) FROM corridors')
+      this.db.query<Corridor>(dataQuery, [...params, pageSize, offset]),
+      this.db.query<{count: string}>(countQuery, params)
     ]);
     
     const total = parseInt(countResult.rows[0].count, 10);
