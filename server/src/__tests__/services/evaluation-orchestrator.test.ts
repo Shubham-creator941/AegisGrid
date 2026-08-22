@@ -43,7 +43,7 @@ suite('EvaluationOrchestrator', () => {
       status: 'DETECTED' as any,
       occurred_at: new Date(),
       detected_at: new Date(),
-      affected_region: 'US-West',
+      affected_region: 'US-West', 
       created_at: new Date(),
       updated_at: new Date()
     },

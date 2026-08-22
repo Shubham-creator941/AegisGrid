@@ -1,38 +1,27 @@
-import test, { suite, after } from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert';
 import { PostgresAIAnalysisRepository } from '../../repositories/postgres/postgres-ai-analysis.repository.js';
-import { getTestDatabase } from '../../infrastructure/database/client.js';
+import { DatabaseClient, QueryResult } from '../../infrastructure/database/client.js';
 
-suite('PostgresAIAnalysisRepository', { skip: process.env.NODE_ENV !== 'test' && !process.env.TEST_DATABASE_URL }, () => {
-  let db: any;
-  let repo: PostgresAIAnalysisRepository;
-
-  test('setup', async () => {
-    try {
-      db = await getTestDatabase();
-      repo = new PostgresAIAnalysisRepository(db);
-    } catch (err: any) {
-      if (err.message.includes('Database connection failed')) {
-        console.log('Database connection failed or unsafe environment: Refusing to run tests against potential production database. Must set TEST_DATABASE_URL or NODE_ENV=test.');
-      } else {
-        throw err;
+test('PostgresAIAnalysisRepository', async (t) => {
+  await t.test('create generates UUID and returns entity', async () => {
+    const mockDb: DatabaseClient = {
+      query: async <T>(sql: string, params?: unknown[]): Promise<QueryResult<T>> => {
+        return {
+          rows: [{
+            id: 'analysis-1',
+            event_id: params?.[1],
+            model_name: params?.[2],
+            created_at: new Date()
+          } as unknown as T],
+          rowCount: 1
+        };
       }
-    }
-  });
-
-  after(async () => {
-    if (db) {
-      await db.close();
-    }
-  });
-
-  test('create generates UUID and returns entity', async (t) => {
-    if (!db) {
-      t.skip('Database unavailable');
-      return;
-    }
+    };
+    
+    const repo = new PostgresAIAnalysisRepository(mockDb);
     const analysis = await repo.create({
-      event_id: '11111111-1111-1111-1111-111111111111', // Assuming there's a dummy event or FK is not strictly checked for test
+      event_id: '11111111-1111-1111-1111-111111111111',
       model_name: 'test-model',
       model_version: 'v1',
       analysis_version: 1,

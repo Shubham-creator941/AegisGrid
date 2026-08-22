@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth, requireRole } from '../middleware/auth.middleware.js';
+import { requireAuth, requireRole } from '../../middleware/auth.middleware.js';
 import { UserRole } from 'shared';
 import { EventController } from '../../controllers/event.controller.js';
 import { EvidenceController } from '../../controllers/evidence.controller.js';

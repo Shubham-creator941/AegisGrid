@@ -15,6 +15,8 @@ suite('Evidence Application Services', () => {
     severity: 'HIGH' as any,
     status: 'DETECTED' as any,
     affected_region: 'US',
+    occurred_at: new Date(),
+    detected_at: new Date(), 
     created_at: new Date(),
     updated_at: new Date()
   };

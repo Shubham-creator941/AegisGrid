@@ -15,6 +15,14 @@ export class PostgresSupplierRepository implements SupplierRepository {
     return result.rows[0] || null;
   }
 
+  async findByName(name: string): Promise<Supplier | null> {
+    const result = await this.db.query<Supplier>(
+      'SELECT * FROM suppliers WHERE name = $1',
+      [name]
+    );
+    return result.rows[0] || null;
+  }
+
   async create(entity: Omit<Supplier, 'id' | 'created_at' | 'updated_at'>): Promise<Supplier> {
     const id = randomUUID();
     const keys = Object.keys(entity);
@@ -58,14 +66,26 @@ export class PostgresSupplierRepository implements SupplierRepository {
     return result.rows[0] || null;
   }
 
-  async list(page: number, pageSize: number): Promise<PaginatedResult<Supplier>> {
+  async list(page: number, pageSize: number, status?: string): Promise<PaginatedResult<Supplier>> {
     const offset = (page - 1) * pageSize;
+    
+    let query = 'SELECT * FROM suppliers';
+    let countQuery = 'SELECT COUNT(*) FROM suppliers';
+    const params: any[] = [pageSize, offset];
+    const countParams: any[] = [];
+    
+    if (status) {
+      query += ' WHERE status = $3';
+      countQuery += ' WHERE status = $1';
+      params.push(status);
+      countParams.push(status);
+    }
+    
+    query += ' ORDER BY created_at DESC LIMIT $1 OFFSET $2';
+    
     const [dataResult, countResult] = await Promise.all([
-      this.db.query<Supplier>(
-        'SELECT * FROM suppliers ORDER BY created_at DESC LIMIT $1 OFFSET $2',
-        [pageSize, offset]
-      ),
-      this.db.query<{count: string}>('SELECT COUNT(*) FROM suppliers')
+      this.db.query<Supplier>(query, params),
+      this.db.query<{count: string}>(countQuery, countParams)
     ]);
     
     const total = parseInt(countResult.rows[0].count, 10);

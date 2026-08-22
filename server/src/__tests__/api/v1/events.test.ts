@@ -9,7 +9,11 @@ test('EventController', async (t) => {
       execute: async (input: any) => ({ ...input, id: 'event-1' })
     } as unknown as CreateEventService;
 
-    const controller = new EventController(mockService);
+    const controller = new EventController(
+      mockService,
+      {} as any,
+      {} as any
+    );
 
     const req = {
       body: {
@@ -43,7 +47,11 @@ test('EventController', async (t) => {
       execute: async () => ({})
     } as unknown as CreateEventService;
 
-    const controller = new EventController(mockService);
+    const controller = new EventController(
+      mockService,
+      {} as any,
+      {} as any
+    );
 
     const req = {
       body: { title: 'Flood' } // missing description, etc.

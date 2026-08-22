@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UserRole } from 'shared';
-import { requireAuth, requireRole } from '../middleware/auth.middleware.js';
+import { requireAuth, requireRole } from '../../middleware/auth.middleware.js';
 import { DecisionController } from '../../controllers/decision.controller.js';
 import { MakeDecisionApplicationService } from '../../../application/services/decision/make-decision.service.js';
 import { 

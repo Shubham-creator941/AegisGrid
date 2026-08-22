@@ -14,6 +14,8 @@ suite('EventAnalysisService', () => {
     severity: 'HIGH' as any,
     status: 'DETECTED' as any,
     affected_region: 'US',
+    occurred_at: new Date(),
+    detected_at: new Date(), 
     created_at: new Date(),
     updated_at: new Date()
   };
@@ -21,12 +23,14 @@ suite('EventAnalysisService', () => {
   const mockEvidence: Evidence = {
     id: 'evidence-1',
     event_id: 'event-1',
-    source: 'TEST',
-    evidence_type: 'DOCUMENT' as any,
+    source_type: 'NEWS',
+    source_name: 'Test Source',
+    source_reference: 'http://test',
     content: 'Some data',
-    confidence_score: 0.8,
-    created_at: new Date(),
-    updated_at: new Date()
+    published_at: new Date(),
+    retrieved_at: new Date(),
+    confidence: 0.8,
+    created_at: new Date()
   };
 
   const mockTxManager = {

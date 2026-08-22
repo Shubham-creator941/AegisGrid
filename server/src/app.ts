@@ -3,6 +3,7 @@ import cors from 'cors';
 import { healthRouter } from './api/routes/health.js';
 import { errorHandler } from './api/middleware/error.js';
 import { eventsRouter } from './api/routes/v1/events.js';
+import { suppliersRouter } from './api/routes/v1/suppliers.js';
 import { scenariosRouter } from './api/routes/v1/scenarios.js';
 import { decisionsRouter } from './api/routes/v1/decisions.js';
 import { evaluationsRouter } from './api/routes/v1/evaluations.js';
@@ -25,6 +26,7 @@ export function createApp(): Express {
   // API Routes
   app.use('/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/suppliers', suppliersRouter);
   app.use('/api/v1/events', eventsRouter);
   app.use('/api/v1/scenarios', scenariosRouter);
   app.use('/api/v1/evaluations', evaluationsRouter);

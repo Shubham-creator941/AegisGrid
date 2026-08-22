@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.middleware.js';
+import { requireAuth } from '../../middleware/auth.middleware.js';
 import { EvaluationController } from '../../controllers/evaluation.controller.js';
 import { GetEvaluationService } from '../../../application/services/evaluation/get-evaluation.service.js';
 import { ScenarioEvaluationService } from '../../../application/services/evaluation/scenario-evaluation.service.js';
