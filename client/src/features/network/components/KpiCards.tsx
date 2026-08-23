@@ -3,11 +3,11 @@ import { Activity } from 'lucide-react';
 export function KpiCards({ loading }: { loading?: boolean }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="bg-[#0B1120] border border-[#1E293B] rounded-xl p-5 animate-pulse h-32">
-            <div className="h-4 bg-slate-800 rounded w-1/2 mb-3"></div>
-            <div className="h-8 bg-slate-800 rounded w-1/3"></div>
+          <div key={i} className="bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] p-5 animate-pulse h-32">
+            <div className="h-4 bg-slate-800 rounded-md w-1/2 mb-3"></div>
+            <div className="h-8 bg-slate-800 rounded-md w-1/3"></div>
           </div>
         ))}
       </div>
@@ -86,78 +86,112 @@ export function KpiCards({ loading }: { loading?: boolean }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
       
       {/* CARD 1: VOLUME */}
-      <div className="bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] rounded-xl p-5 flex flex-col justify-between transition-colors shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
+      <div className="bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] p-5 flex flex-col h-[180px] shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
           <Activity size={48} className="text-[#22D3EE]" />
         </div>
-        <div>
-          <h3 className="text-[10px] font-bold tracking-widest text-slate-500 mb-1.5 uppercase">Total Volume in Transit</h3>
+        
+        {/* Header / Label */}
+        <div className="mb-2">
+          <h3 className="text-[11px] font-semibold tracking-widest text-[#5D6C85] uppercase">Total Volume in Transit</h3>
+        </div>
+        
+        {/* Value + Trend */}
+        <div className="flex flex-col">
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-light text-slate-100 tracking-tight">1.82M</span>
-            <span className="text-sm font-medium text-slate-400">bbl/d</span>
+            <span className="text-[28px] font-semibold text-slate-100 tracking-tight leading-none">1.82M</span>
+            <span className="text-sm font-medium text-slate-500">bbl/d</span>
           </div>
-          <div className="text-xs text-[#22D3EE] font-medium mt-1">
-            ↑ 3.6% <span className="text-slate-500 font-normal">vs yesterday</span>
+          <div className="text-[11px] text-[#22D3EE] font-semibold mt-1.5 flex items-center gap-1">
+            ↑ 3.6% <span className="text-slate-500 font-medium">vs yesterday</span>
           </div>
         </div>
-        <div className="mt-4 w-full">
+
+        {/* Visualization Zone */}
+        <div className="mt-auto w-full pt-4">
           <Sparkline color="#22D3EE" data={[1.6, 1.62, 1.58, 1.65, 1.7, 1.75, 1.82]} type="bar" />
         </div>
       </div>
 
       {/* CARD 2: RESERVE COVER */}
-      <div className="bg-[#0B1120] border border-[#1E293B] hover:border-[#334155] rounded-xl p-5 flex flex-col justify-between transition-colors shadow-sm">
-        <div>
-          <h3 className="text-[10px] font-bold tracking-widest text-slate-500 mb-1.5 uppercase">Strategic Reserve Cover</h3>
+      <div className="bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] p-5 flex flex-col h-[180px] shadow-sm group">
+        {/* Header / Label */}
+        <div className="mb-2">
+          <h3 className="text-[11px] font-semibold tracking-widest text-[#5D6C85] uppercase">Strategic Reserve Cover</h3>
+        </div>
+        
+        {/* Value + Trend */}
+        <div className="flex flex-col">
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-light text-slate-100 tracking-tight">45</span>
-            <span className="text-sm font-medium text-slate-400">Days</span>
+            <span className="text-[28px] font-semibold text-slate-100 tracking-tight leading-none">45</span>
+            <span className="text-sm font-medium text-slate-500">Days</span>
           </div>
-          <div className="text-xs text-[#10B981] font-medium mt-1">
-            ↑ 2 Days <span className="text-slate-500 font-normal">at current rate</span>
+          <div className="text-[11px] text-[#16D978] font-semibold mt-1.5 flex items-center gap-1">
+            ↑ 2 Days <span className="text-slate-500 font-medium">at current rate</span>
           </div>
         </div>
-        <div className="mt-4 w-full">
-          <Sparkline color="#10B981" data={[40, 41, 41, 42, 43, 44, 45]} />
+
+        {/* Visualization Zone */}
+        <div className="mt-auto w-full pt-4">
+          <Sparkline color="#16D978" data={[40, 41, 41, 42, 43, 44, 45]} />
         </div>
       </div>
 
       {/* CARD 3: DISRUPTION ALERTS */}
-      <div className="bg-[#0B1120] border border-[#1E293B] hover:border-[#EF4444]/50 rounded-xl p-5 flex flex-col justify-between transition-colors shadow-[0_0_15px_rgba(239,68,68,0.05)] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1.5 h-full bg-[#EF4444]/80"></div>
-        <div>
-          <h3 className="text-[10px] font-bold tracking-widest text-slate-500 mb-1.5 uppercase">Active Disruption Alerts</h3>
+      <div className="bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] p-5 flex flex-col h-[180px] shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-1.5 h-full bg-[#FF414D]/80"></div>
+        
+        {/* Header / Label */}
+        <div className="mb-2">
+          <h3 className="text-[11px] font-semibold tracking-widest text-[#5D6C85] uppercase">Active Disruption Alerts</h3>
+        </div>
+        
+        {/* Value + Trend */}
+        <div className="flex flex-col">
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-medium text-[#EF4444] tracking-tight">1</span>
-            <span className="text-sm font-bold text-[#EF4444] uppercase tracking-wide">Critical</span>
+            <span className="text-[28px] font-semibold text-[#FF414D] tracking-tight leading-none">1</span>
+            <span className="text-sm font-bold text-[#FF414D] uppercase tracking-wide">Critical</span>
           </div>
-          <div className="text-xs font-semibold text-slate-300 mt-1 truncate">
+          <div className="text-[11px] font-semibold text-slate-300 mt-1.5 truncate">
             Strait of Hormuz Blockade
           </div>
         </div>
-        <div className="mt-4 w-full flex items-center justify-between">
-          <div className="text-xs text-[#EF4444] font-bold bg-[#EF4444]/10 px-2 py-0.5 rounded">↑ 1</div>
-          <div className="w-24">
-            <Sparkline color="#EF4444" data={[0, 0, 0, 0, 0, 1, 1]} />
+
+        {/* Visualization Zone */}
+        <div className="mt-auto w-full pt-4 flex items-center justify-between gap-4">
+          <div className="text-[10px] text-[#FF414D] font-bold bg-[#FF414D]/10 px-2 py-0.5 rounded border border-[#FF414D]/20">↑ 1</div>
+          <div className="flex-1">
+            <Sparkline color="#FF414D" data={[0, 0, 0, 0, 0, 1, 1]} />
           </div>
         </div>
       </div>
 
       {/* CARD 4: RISK INDEX */}
-      <div className="bg-[#0B1120] border border-[#1E293B] hover:border-[#F59E0B]/50 rounded-xl p-5 flex flex-col justify-between transition-colors shadow-sm">
-        <div>
-          <h3 className="text-[10px] font-bold tracking-widest text-slate-500 mb-1.5 uppercase">Network Risk Index</h3>
-          <div className="flex justify-between items-start">
-            <div className="text-xs text-[#F59E0B] font-medium mt-1">
-              ↑ 4 <span className="text-slate-500 font-normal">vs yesterday</span>
-            </div>
+      <div className="bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] p-5 flex flex-col h-[180px] shadow-sm group">
+        {/* Header / Label */}
+        <div className="mb-2">
+          <h3 className="text-[11px] font-semibold tracking-widest text-[#5D6C85] uppercase">Network Risk Index</h3>
+        </div>
+        
+        {/* Value + Trend */}
+        <div className="flex flex-col relative">
+          <div className="flex items-baseline gap-2 invisible h-0">
+            {/* Hidden spacer to maintain exact identical geometry */}
+            <span className="text-[28px] font-semibold leading-none">0</span>
+          </div>
+          <div className="text-[11px] text-[#FF8A00] font-semibold mt-1.5 flex items-center gap-1 z-10">
+            ↑ 4 <span className="text-slate-500 font-medium">vs yesterday</span>
           </div>
         </div>
-        <div className="mt-2 w-full">
-          <Gauge value={72} label="HIGH" color="#F59E0B" />
+
+        {/* Visualization Zone */}
+        <div className="mt-auto w-full pt-4 pb-2 relative">
+           <div className="absolute bottom-6 w-full -mt-8">
+             <Gauge value={72} label="HIGH" color="#FF8A00" />
+           </div>
         </div>
       </div>
 

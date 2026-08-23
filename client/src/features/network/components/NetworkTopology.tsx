@@ -13,7 +13,7 @@ export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopol
   
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center border border-[#1E293B] bg-[#0B1120] rounded-xl">
+      <div className="w-full h-full flex items-center justify-center">
         <div className="flex flex-col items-center text-slate-500">
           <Activity className="animate-spin mb-2" size={24} />
           <span className="text-xs uppercase tracking-wider font-semibold">Mapping Topology...</span>
@@ -24,7 +24,7 @@ export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopol
 
   if (!suppliers.length && !facilities.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center border border-[#1E293B] bg-[#0B1120] rounded-xl">
+      <div className="w-full h-full flex items-center justify-center">
         <div className="flex flex-col items-center text-slate-600">
           <Anchor className="mb-2 opacity-50" size={24} />
           <span className="text-xs uppercase tracking-wider">No topology data</span>
@@ -59,10 +59,10 @@ export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopol
 
   const renderStatusIcon = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return <CheckCircle size={14} className="text-[#10B981]" />;
+      case 'ACTIVE': return <CheckCircle size={14} className="text-status-normal" />;
       case 'MAINTENANCE':
-      case 'DISRUPTED': return <AlertTriangle size={14} className="text-[#F59E0B]" />;
-      case 'CRITICAL': return <AlertTriangle size={14} className="text-[#EF4444]" />;
+      case 'DISRUPTED': return <AlertTriangle size={14} className="text-status-warning" />;
+      case 'CRITICAL': return <AlertTriangle size={14} className="text-status-critical" />;
       case 'INACTIVE': return <XCircle size={14} className="text-slate-500" />;
       default: return <div className="w-3.5 h-3.5 rounded-full bg-slate-600" />;
     }
@@ -70,38 +70,38 @@ export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopol
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'CRITICAL': return 'text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/30';
-      case 'DISRUPTED': return 'text-[#F97316] bg-[#F97316]/10 border-[#F97316]/30';
-      case 'MAINTENANCE': return 'text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30';
-      case 'ACTIVE': return 'text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30';
+      case 'CRITICAL': return 'text-status-critical bg-status-critical/10 border-status-critical/30';
+      case 'DISRUPTED': return 'text-status-warning bg-status-warning/10 border-status-warning/30';
+      case 'MAINTENANCE': return 'text-status-warning bg-status-warning/10 border-status-warning/30';
+      case 'ACTIVE': return 'text-status-normal bg-status-normal/10 border-status-normal/30';
       default: return 'text-slate-400 bg-slate-800 border-slate-700';
     }
   };
 
   return (
-    <div className="w-full h-full bg-[#0B1120] border border-[#1E293B] rounded-xl flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-[#1E293B] bg-[#0F172A]/50">
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      <div className="px-4 py-3 border-b border-[#1E293B] bg-[#0F172A]/50 shrink-0">
         <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-          <Activity size={14} className="text-[#22D3EE]" />
+          <Activity size={14} className="text-status-recommended" />
           Network Topology
         </h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-5 space-y-6">
         
         {/* SUPPLIERS */}
         <div>
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-1">Suppliers</h3>
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-2">Suppliers</h3>
           <div className="space-y-2">
             {demoSuppliers.map(s => (
-              <div key={s.id} className="bg-[#0F172A] border border-[#1E293B] hover:border-[#334155] rounded-lg p-3 transition-colors">
+              <div key={s.id} className="bg-[#0F172A] border border-[#1E293B] rounded-[var(--radius-md)] p-3">
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-semibold text-sm text-slate-200">{s.name}</span>
                   {renderStatusIcon(s.status)}
                 </div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-500 font-mono tracking-tight">{s.classification}</span>
-                  <span className="text-[#22D3EE] font-medium">{s.share}</span>
+                  <span className="text-status-recommended font-medium">{s.share}</span>
                 </div>
               </div>
             ))}
@@ -110,10 +110,10 @@ export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopol
 
         {/* ORIGIN TERMINALS */}
         <div>
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-1">Origin Terminals</h3>
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-2">Origin Terminals</h3>
           <div className="space-y-2">
             {demoOrigins.map(o => (
-              <div key={o.id} className="flex justify-between items-center bg-[#0F172A] border border-[#1E293B] rounded-lg p-3">
+              <div key={o.id} className="flex justify-between items-center bg-[#0F172A] border border-[#1E293B] rounded-[var(--radius-md)] p-3">
                 <div>
                   <div className="font-semibold text-sm text-slate-200">{o.name}</div>
                   <div className="text-xs text-slate-500">{o.region}</div>
@@ -126,17 +126,17 @@ export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopol
 
         {/* MARITIME CORRIDORS */}
         <div>
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-1">Maritime Corridors</h3>
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-2">Maritime Corridors</h3>
           <div className="space-y-2">
             {demoCorridors.map(c => (
-              <div key={c.id} className="bg-[#0F172A] border border-[#1E293B] rounded-lg p-3">
+              <div key={c.id} className="bg-[#0F172A] border border-[#1E293B] rounded-[var(--radius-md)] p-3">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-semibold text-sm text-slate-200">{c.name}</span>
                   <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${getStatusColor(c.status)}`}>
                     {c.label}
                   </span>
                 </div>
-                <div className="text-xs text-slate-500 font-medium">
+                <div className="text-xs text-slate-500 font-medium truncate">
                   {c.route}
                 </div>
               </div>

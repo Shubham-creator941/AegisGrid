@@ -17,6 +17,17 @@
   --color-aegis-orange: #FF8A00;
   --color-aegis-red: #FF414D;
   --color-aegis-purple: #9B5CFF;
+
+  --color-status-normal: var(--color-aegis-green);
+  --color-status-recommended: var(--color-aegis-cyan);
+  --color-status-warning: var(--color-aegis-orange);
+  --color-status-critical: var(--color-aegis-red);
+  --color-status-alternative: var(--color-aegis-purple);
+  --color-status-neutral: var(--color-aegis-text-secondary);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
 body {

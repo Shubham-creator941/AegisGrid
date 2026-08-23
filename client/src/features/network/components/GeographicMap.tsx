@@ -42,11 +42,11 @@ const GEO_COORDINATES: Record<string, [number, number]> = {
 
 const getRiskColor = (status: string) => {
   switch (status) {
-    case 'CRITICAL': return '#EF4444';
-    case 'DISRUPTED': return '#F97316';
-    case 'MAINTENANCE': return '#F59E0B';
-    case 'ACTIVE': return '#10B981';
-    default: return '#64748B';
+    case 'CRITICAL': return 'var(--color-status-critical)';
+    case 'DISRUPTED': return 'var(--color-status-warning)';
+    case 'MAINTENANCE': return 'var(--color-status-warning)';
+    case 'ACTIVE': return 'var(--color-status-normal)';
+    default: return 'var(--color-status-neutral)';
   }
 };
 
@@ -191,7 +191,7 @@ export function GeographicMap({
 
   if (loading) {
     return (
-      <div className="h-full min-h-[500px] flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800">
+      <div className="h-full min-h-[500px] flex items-center justify-center bg-slate-950 rounded-[var(--radius-lg)] border border-slate-800">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-500"></div>
       </div>
     );
@@ -216,7 +216,7 @@ export function GeographicMap({
 
       {/* Floating Route Label */}
       {hasSelection && selectedCandidateName && (
-        <div className="absolute top-6 right-6 z-10 bg-aegis-base/90 backdrop-blur-md border border-aegis-border shadow-2xl p-4 rounded-xl text-right max-w-sm">
+        <div className="absolute top-6 right-6 z-10 bg-aegis-base/90 backdrop-blur-md border border-aegis-border shadow-2xl p-4 rounded-[var(--radius-lg)] text-right max-w-sm">
           <div className={`text-[10px] font-black uppercase tracking-widest mb-1.5 ${isSelectedRecommended ? 'text-aegis-cyan' : 'text-aegis-text-secondary'}`}>
             {isSelectedRecommended ? '★ SYSTEM RECOMMENDED' : 'ALTERNATIVE RESPONSE'}
           </div>
@@ -264,27 +264,28 @@ export function GeographicMap({
             
             let strokeColor = "#475569";
             let strokeW = 1.5 / position.zoom;
-            let opacity = 0.4;
+            let opacity = 0.3;
             let glow = 'none';
             let strokeDasharray = undefined;
 
             if (r.isHighlighted) {
               if (isSelectedRecommended) {
                 // System Recommended Route
-                strokeColor = "#22D3EE";
-                strokeW = 4 / position.zoom;
+                strokeColor = "var(--color-status-recommended)";
+                strokeW = 4.5 / position.zoom;
                 opacity = 1;
-                glow = `drop-shadow(0px 0px ${8/position.zoom}px rgba(34,211,238,0.5))`;
+                glow = `drop-shadow(0px 0px ${6/position.zoom}px var(--color-status-recommended))`;
               } else {
                 // Alternative Route
-                strokeColor = "#64748B";
-                strokeW = 2.5 / position.zoom;
+                strokeColor = "var(--color-status-alternative)";
+                strokeW = 3 / position.zoom;
                 opacity = 0.9;
                 strokeDasharray = `${6/position.zoom} ${4/position.zoom}`;
+                glow = `drop-shadow(0px 0px ${4/position.zoom}px var(--color-status-alternative))`;
               }
             } else if (hasSelection) {
               // Existing Network when something is selected
-              opacity = 0.2;
+              opacity = 0.15;
               strokeW = 1 / position.zoom;
             }
 
@@ -353,14 +354,14 @@ export function GeographicMap({
                   onMouseLeave={() => setTooltipContent(null)}
                 >
                   <polygon 
-                    points={`0,-${10*scale} ${10*scale},${8*scale} -${10*scale},${8*scale}`}
+                    points={`0,-${12*scale} ${12*scale},${10*scale} -${12*scale},${10*scale}`}
                     fill={rColor} 
                     stroke="#0F172A"
                     strokeWidth={1.5*scale}
-                    style={{ filter: active ? `drop-shadow(0px 0px ${5*scale}px ${rColor})` : 'none' }}
+                    style={{ filter: active ? `drop-shadow(0px 0px ${6*scale}px ${rColor})` : 'none' }}
                   />
                   {active && (
-                    <text y={-14*scale} textAnchor="middle" fill="#F1F5F9" fontSize={10*scale} fontWeight="bold" style={{ textShadow: "0px 1px 3px #000" }}>
+                    <text y={-16*scale} textAnchor="middle" fill="#F1F5F9" fontSize={11*scale} fontWeight="bold" style={{ textShadow: "0px 1px 4px #000" }}>
                       {corridor.name}
                     </text>
                   )}
@@ -389,17 +390,17 @@ export function GeographicMap({
             if (active) {
               fSize = 5;
               fLabel = facility.name;
-              fColor = "#94A3B8";
+              fColor = "var(--color-status-neutral)";
               
               if (isOrigin) {
-                fColor = "#22C55E";
-                fLabelColor = "#4ADE80";
-                fSize = 7;
+                fColor = "var(--color-status-normal)";
+                fLabelColor = "var(--color-status-normal)";
+                fSize = 7.5;
                 fLabel = "ORIGIN";
               } else if (isDest) {
-                fColor = "#A78BFA";
-                fLabelColor = "#C084FC";
-                fSize = 7;
+                fColor = "var(--color-status-alternative)";
+                fLabelColor = "var(--color-status-alternative)";
+                fSize = 7.5;
                 fLabel = "DESTINATION";
               }
             }
@@ -415,16 +416,16 @@ export function GeographicMap({
                     r={fSize * scale} 
                     fill={fColor} 
                     stroke="#0F172A" 
-                    strokeWidth={1.5 * scale} 
-                    style={{ filter: active ? `drop-shadow(0px 0px ${4*scale}px ${fColor})` : 'none' }}
+                    strokeWidth={2 * scale} 
+                    style={{ filter: active ? `drop-shadow(0px 0px ${5*scale}px ${fColor})` : 'none' }}
                   />
                   {active && (
-                    <text y={-12*scale} textAnchor="middle" fill={fLabelColor} fontSize={10*scale} fontWeight="900" style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.8)" }}>
+                    <text y={-14*scale} textAnchor="middle" fill={fLabelColor} fontSize={11*scale} fontWeight="900" style={{ textShadow: "0px 1px 4px rgba(0,0,0,0.9)" }}>
                       {fLabel}
                     </text>
                   )}
                   {active && (isOrigin || isDest) && (
-                    <text y={18*scale} textAnchor="middle" fill="#F8FAFC" fontSize={9*scale} fontWeight="600" style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.8)" }}>
+                    <text y={18*scale} textAnchor="middle" fill="#F8FAFC" fontSize={10*scale} fontWeight="600" style={{ textShadow: "0px 1px 4px rgba(0,0,0,0.9)" }}>
                       {facility.name}
                     </text>
                   )}
@@ -436,28 +437,28 @@ export function GeographicMap({
       </ComposableMap>
 
       {/* Map Legend */}
-      <div className="absolute bottom-6 left-6 z-10 bg-aegis-base/90 backdrop-blur-sm border border-aegis-border shadow-xl p-4 rounded-xl text-xs w-48">
-        <div className="font-bold text-white uppercase tracking-widest mb-3 text-[10px]">Route Status</div>
-        <div className="flex flex-col gap-2.5">
-          <div className="flex items-center gap-3 text-aegis-text font-medium">
-            <div className="w-6 h-1 rounded-full bg-aegis-cyan shadow-[0_0_8px_rgba(24,199,217,0.5)]"></div>
-            Recommended
+      <div className="absolute bottom-6 left-6 z-10 bg-[#0B1120]/90 backdrop-blur-md border border-[#1E293B] shadow-xl p-4 rounded-[var(--radius-lg)] text-xs w-auto min-w-[200px] max-w-[250px]">
+        <div className="font-bold text-slate-200 uppercase tracking-widest mb-3 text-[10px]">Route Status</div>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 text-slate-100 font-medium">
+            <div className="w-8 h-1 rounded-full bg-status-recommended shadow-[0_0_8px_var(--color-status-recommended)] shrink-0"></div>
+            <span className="truncate">Recommended</span>
           </div>
-          <div className="flex items-center gap-3 text-aegis-text-secondary">
-            <div className="w-6 h-[2px] bg-transparent border-t-2 border-dashed border-aegis-text-muted"></div>
-            Alternative
+          <div className="flex items-center gap-3 text-slate-400">
+            <div className="w-8 h-[3px] bg-transparent border-t-2 border-dashed border-status-alternative shrink-0"></div>
+            <span className="truncate">Alternative</span>
           </div>
-          <div className="flex items-center gap-3 text-white">
-            <div className="w-2.5 h-2.5 rounded-full bg-aegis-green"></div>
-            Origin
+          <div className="flex items-center gap-3 text-slate-200">
+            <div className="w-3 h-3 rounded-full bg-status-normal shrink-0"></div>
+            <span className="truncate">Origin</span>
           </div>
-          <div className="flex items-center gap-3 text-white">
-            <div className="w-2.5 h-2.5 rounded-full bg-aegis-purple"></div>
-            Destination
+          <div className="flex items-center gap-3 text-slate-200">
+            <div className="w-3 h-3 rounded-full bg-status-alternative shrink-0"></div>
+            <span className="truncate">Destination</span>
           </div>
-          <div className="flex items-center gap-3 text-white">
-            <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[8px] border-b-aegis-red"></div>
-            Risk / Chokepoint
+          <div className="flex items-center gap-3 text-slate-200">
+            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-status-critical shrink-0"></div>
+            <span className="truncate">Risk / Chokepoint</span>
           </div>
         </div>
       </div>
@@ -466,13 +467,13 @@ export function GeographicMap({
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
         <button 
           onClick={() => setPosition(p => ({ ...p, zoom: Math.min(p.zoom * 1.5, 15) }))}
-          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-lg shadow-lg flex items-center justify-center border border-aegis-border transition-colors"
+          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue"
         >
           +
         </button>
         <button 
           onClick={() => setPosition(p => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }))}
-          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-lg shadow-lg flex items-center justify-center border border-aegis-border transition-colors"
+          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue"
         >
           -
         </button>
@@ -480,7 +481,7 @@ export function GeographicMap({
 
       {/* Tooltip */}
       {tooltipContent && (
-        <div className="absolute top-6 left-6 z-20 bg-aegis-base border border-aegis-border shadow-2xl p-4 rounded-lg min-w-[220px]">
+        <div className="absolute top-6 left-6 z-20 bg-aegis-base border border-aegis-border shadow-2xl p-4 rounded-[var(--radius-md)] min-w-[220px]">
           <div className="text-[10px] font-bold text-aegis-text-muted uppercase tracking-widest mb-1">{tooltipContent.type}</div>
           <div className="text-sm font-semibold text-white mb-3">{tooltipContent.data.name}</div>
           <div className="flex flex-col gap-1.5 text-xs">

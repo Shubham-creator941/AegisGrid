@@ -9,20 +9,20 @@ export function ArrivalsTable() {
   ];
 
   return (
-    <div className="w-full h-full bg-[#0B1120] border border-[#1E293B] rounded-xl overflow-hidden flex flex-col shadow-sm">
-      <div className="px-4 py-3 border-b border-[#1E293B] bg-[#0F172A]/50 flex justify-between items-center">
+    <div className="w-full h-full flex flex-col">
+      <div className="px-4 py-3 border-b border-[#1E293B] bg-[#0F172A]/50 shrink-0 flex justify-between items-center">
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
           <Ship size={14} className="text-[#22D3EE]" />
           Scheduled Arrivals <span className="text-slate-500 font-medium ml-1 capitalize tracking-normal">Next 72 Hours</span>
         </h3>
-        <button className="text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition-colors">
+        <button className="text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition-colors shrink-0">
           View All &rarr;
         </button>
       </div>
-      <div className="flex-1 overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-[#1E293B] text-[10px] uppercase tracking-widest text-slate-500 bg-[#0F172A]">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full text-left border-collapse min-w-[400px]">
+          <thead className="sticky top-0 bg-[#0F172A] z-10 shadow-sm">
+            <tr className="border-b border-[#1E293B] text-[10px] uppercase tracking-widest text-slate-500">
               <th className="px-4 py-3 font-semibold">Vessel</th>
               <th className="px-4 py-3 font-semibold">Route</th>
               <th className="px-4 py-3 font-semibold">Cargo</th>
@@ -38,10 +38,10 @@ export function ArrivalsTable() {
                 <td className="px-4 py-3 text-slate-300 font-mono tracking-tight">{row.cargo}</td>
                 <td className="px-4 py-3 text-slate-400 font-mono tracking-tight">{row.eta}</td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
                     row.status === 'On Time' 
-                      ? 'text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/30' 
-                      : 'text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/30'
+                      ? 'text-status-normal bg-status-normal/10 border border-status-normal/30' 
+                      : 'text-status-warning bg-status-warning/10 border border-status-warning/30'
                   }`}>
                     {row.status}
                   </span>

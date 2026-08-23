@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 import { 
-  Building2, 
   MapPin, 
   Route, 
   AlertCircle,
-  Activity,
-  ShieldAlert,
   ChevronRight,
   Search
 } from 'lucide-react';
-import { useNetworkEntities, useEntityDetail } from '../features/network/hooks/useNetwork';
+import { useNetworkEntities } from '../features/network/hooks/useNetwork';
 import { NetworkApi } from '../features/network/api/network.api';
 import type { Supplier, Facility, Corridor, SupplyFlow } from '../features/network/api/network.api';
 import { SupplierDetails } from '../features/network/components/SupplierDetails';
