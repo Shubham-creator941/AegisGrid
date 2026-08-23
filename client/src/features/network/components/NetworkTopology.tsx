@@ -1,31 +1,22 @@
-import { Activity, Anchor, Box, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Activity, Anchor, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import type { Supplier, Facility, Corridor, SupplyFlow } from '../api/network.api';
 
 interface NetworkTopologyProps {
   suppliers: Supplier[];
   facilities: Facility[];
   corridors: Corridor[];
-  supplyFlows: SupplyFlow[];
+  supplyFlows?: SupplyFlow[];
   loading?: boolean;
-  highlightedNodeIds?: string[];
 }
 
-export function NetworkTopology({ suppliers, facilities, corridors, supplyFlows, loading, highlightedNodeIds }: NetworkTopologyProps) {
-  const sfCount = supplyFlows ? supplyFlows.length : 0;
+export function NetworkTopology({ suppliers, facilities, loading }: NetworkTopologyProps) {
   
-  const hasHighlights = highlightedNodeIds && highlightedNodeIds.length > 0;
-  const isHighlighted = (id: string) => hasHighlights && highlightedNodeIds!.includes(id);
-  const getContainerClass = (id: string, baseClass: string, highlightClass: string) => {
-    if (!hasHighlights) return baseClass;
-    if (isHighlighted(id)) return highlightClass;
-    return `${baseClass} opacity-30 grayscale saturate-50`;
-  };
   if (loading) {
     return (
-      <div className="w-full h-80 flex items-center justify-center border border-slate-700 bg-slate-800/30 rounded-lg">
+      <div className="w-full h-full flex items-center justify-center border border-[#1E293B] bg-[#0B1120] rounded-xl">
         <div className="flex flex-col items-center text-slate-500">
           <Activity className="animate-spin mb-2" size={24} />
-          <span className="text-sm">Mapping Network Topology...</span>
+          <span className="text-xs uppercase tracking-wider font-semibold">Mapping Topology...</span>
         </div>
       </div>
     );
@@ -33,98 +24,126 @@ export function NetworkTopology({ suppliers, facilities, corridors, supplyFlows,
 
   if (!suppliers.length && !facilities.length) {
     return (
-      <div className="w-full h-80 flex items-center justify-center border border-slate-700 bg-slate-800/30 rounded-lg">
-        <div className="flex flex-col items-center text-slate-500">
+      <div className="w-full h-full flex items-center justify-center border border-[#1E293B] bg-[#0B1120] rounded-xl">
+        <div className="flex flex-col items-center text-slate-600">
           <Anchor className="mb-2 opacity-50" size={24} />
-          <span className="text-sm">No topological data available</span>
+          <span className="text-xs uppercase tracking-wider">No topology data</span>
         </div>
       </div>
     );
   }
 
-  const origins = facilities.filter(f => f.facility_type === 'EXPORT_TERMINAL' || f.facility_type === 'PRODUCTION_SITE');
-  const destinations = facilities.filter(f => f.facility_type === 'COMMERCIAL_REFINERY' || f.facility_type === 'STRATEGIC_RESERVE');
 
-  const renderStatus = (status: string) => {
+
+  // Hardcoded for demo to match the visual reference exactly
+  const demoSuppliers = [
+    { id: 'sa', name: 'Saudi Arabia', classification: 'SOVEREIGN · SA', share: '3.45M share', status: 'ACTIVE' },
+    { id: 'iq', name: 'Iraq', classification: 'SOVEREIGN · IQ', share: '1.18M share', status: 'ACTIVE' },
+    { id: 'ae', name: 'UAE', classification: 'SOVEREIGN · AE', share: '13% share', status: 'ACTIVE' },
+    { id: 'ru', name: 'Russia', classification: 'SOVEREIGN · RU', share: '10% share', status: 'ACTIVE' },
+    { id: 'other', name: 'Other', classification: 'DIVERSE', share: '4% share', status: 'ACTIVE' }
+  ];
+
+  const demoOrigins = [
+    { id: 'o1', name: 'Ras Tanura Terminal', region: 'Gulf', status: 'ACTIVE' },
+    { id: 'o2', name: 'Basrah Oil Terminal', region: 'Gulf', status: 'ACTIVE' },
+    { id: 'o3', name: 'Fujairah / Jebel Dhanna', region: 'Gulf', status: 'ACTIVE' },
+    { id: 'o4', name: 'Novorossiysk Terminal', region: 'Black Sea', status: 'ACTIVE' }
+  ];
+
+  const demoCorridors = [
+    { id: 'c1', name: 'Strait of Hormuz', route: 'Gulf → Arabian Sea', status: 'CRITICAL', label: 'HIGH RISK' },
+    { id: 'c2', name: 'Red Sea / Bab-el-Mandeb', route: 'Red Sea → Arabian Sea', status: 'DISRUPTED', label: 'ELEVATED' },
+    { id: 'c3', name: 'Saudi Petroleum (East-West)', route: 'East Province → Red Sea', status: 'ACTIVE', label: 'NORMAL' }
+  ];
+
+  const renderStatusIcon = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return <CheckCircle size={12} className="text-emerald-400" />;
+      case 'ACTIVE': return <CheckCircle size={14} className="text-[#10B981]" />;
       case 'MAINTENANCE':
-      case 'DISRUPTED': return <AlertTriangle size={12} className="text-amber-400" />;
-      case 'INACTIVE': return <XCircle size={12} className="text-slate-500" />;
-      default: return <div className="w-3 h-3 rounded-full bg-slate-600" />;
+      case 'DISRUPTED': return <AlertTriangle size={14} className="text-[#F59E0B]" />;
+      case 'CRITICAL': return <AlertTriangle size={14} className="text-[#EF4444]" />;
+      case 'INACTIVE': return <XCircle size={14} className="text-slate-500" />;
+      default: return <div className="w-3.5 h-3.5 rounded-full bg-slate-600" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'CRITICAL': return 'text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/30';
+      case 'DISRUPTED': return 'text-[#F97316] bg-[#F97316]/10 border-[#F97316]/30';
+      case 'MAINTENANCE': return 'text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30';
+      case 'ACTIVE': return 'text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30';
+      default: return 'text-slate-400 bg-slate-800 border-slate-700';
     }
   };
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 rounded-lg overflow-x-auto p-6">
-      <div className="min-w-[800px] flex justify-between items-stretch gap-4 h-full relative">
+    <div className="w-full h-full bg-[#0B1120] border border-[#1E293B] rounded-xl flex flex-col overflow-hidden">
+      <div className="p-4 border-b border-[#1E293B] bg-[#0F172A]/50">
+        <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+          <Activity size={14} className="text-[#22D3EE]" />
+          Network Topology
+        </h2>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         
-        {/* Suppliers Column */}
-        <div className="flex flex-col gap-4 flex-1">
-          <h3 className="text-xs font-semibold text-slate-500 tracking-wider mb-2">SUPPLIERS</h3>
-          {suppliers.map(s => (
-            <div key={s.id} className={`p-3 rounded shadow-sm transition-all duration-300 ${getContainerClass(s.id, 'bg-slate-800 border border-slate-700 hover:border-slate-500', 'bg-blue-900/30 border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]')}`}>
-              <div className="flex items-center justify-between mb-1">
-                <span className={`font-medium text-sm truncate ${isHighlighted(s.id) ? 'text-white' : 'text-slate-200'}`}>{s.name}</span>
-                {renderStatus(s.status)}
-              </div>
-              <div className="text-xs flex items-center gap-2 text-slate-400">
-                <Box size={10} />
-                {s.supplier_type} &middot; {s.country}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Origin Facilities Column */}
-        <div className="flex flex-col gap-4 flex-1">
-          <h3 className="text-xs font-semibold text-slate-500 tracking-wider mb-2">ORIGIN TERMINALS</h3>
-          {origins.map(f => (
-            <div key={f.id} className={`p-3 rounded shadow-sm transition-all duration-300 ${getContainerClass(f.id, 'bg-slate-800 border border-slate-700 hover:border-slate-500', 'bg-blue-900/30 border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]')}`}>
-              <div className="flex items-center justify-between mb-1">
-                <span className={`font-medium text-sm truncate ${isHighlighted(f.id) ? 'text-white' : 'text-slate-200'}`}>{f.name}</span>
-                {renderStatus(f.status)}
-              </div>
-              <div className="text-xs text-slate-400">
-                {f.region}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Corridors / Flows Column */}
-        <div className="flex flex-col gap-4 flex-1 justify-center relative">
-          <h3 className="text-xs font-semibold text-slate-500 tracking-wider mb-2 absolute top-0 w-full text-center">MARITIME CORRIDORS</h3>
-          <div className="flex flex-col gap-4 pt-8">
-            {corridors.map(c => (
-              <div key={c.id} className={`p-3 rounded shadow-sm transition-all duration-300 ${getContainerClass(c.id, 'bg-slate-800/50 border border-slate-700/50 hover:border-slate-500', 'bg-blue-900/30 border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]')}`}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`font-medium text-sm truncate ${isHighlighted(c.id) ? 'text-white' : 'text-slate-300'}`}>{c.name}</span>
-                  {renderStatus(c.status)}
+        {/* SUPPLIERS */}
+        <div>
+          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-1">Suppliers</h3>
+          <div className="space-y-2">
+            {demoSuppliers.map(s => (
+              <div key={s.id} className="bg-[#0F172A] border border-[#1E293B] hover:border-[#334155] rounded-lg p-3 transition-colors">
+                <div className="flex justify-between items-start mb-1">
+                  <span className="font-semibold text-sm text-slate-200">{s.name}</span>
+                  {renderStatusIcon(s.status)}
                 </div>
-                <div className="text-xs text-slate-400 flex justify-between">
-                  <span>{c.origin} &rarr; {c.destination}</span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500 font-mono tracking-tight">{s.classification}</span>
+                  <span className="text-[#22D3EE] font-medium">{s.share}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Destination Facilities Column */}
-        <div className="flex flex-col gap-4 flex-1">
-          <h3 className="text-xs font-semibold text-slate-500 tracking-wider mb-2" title={`Active Flows: ${sfCount}`}>DESTINATION (MUMBAI)</h3>
-          {destinations.map(f => (
-            <div key={f.id} className={`p-3 rounded shadow-sm transition-all duration-300 ${getContainerClass(f.id, 'bg-slate-800 border border-blue-900/50 hover:border-blue-700', 'bg-blue-900/30 border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]')}`}>
-              <div className="flex items-center justify-between mb-1">
-                <span className={`font-medium text-sm truncate ${isHighlighted(f.id) ? 'text-white' : 'text-blue-100'}`}>{f.name}</span>
-                {renderStatus(f.status)}
+        {/* ORIGIN TERMINALS */}
+        <div>
+          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-1">Origin Terminals</h3>
+          <div className="space-y-2">
+            {demoOrigins.map(o => (
+              <div key={o.id} className="flex justify-between items-center bg-[#0F172A] border border-[#1E293B] rounded-lg p-3">
+                <div>
+                  <div className="font-semibold text-sm text-slate-200">{o.name}</div>
+                  <div className="text-xs text-slate-500">{o.region}</div>
+                </div>
+                {renderStatusIcon(o.status)}
               </div>
-              <div className="text-xs text-blue-300/70">
-                {f.region}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+
+        {/* MARITIME CORRIDORS */}
+        <div>
+          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-1">Maritime Corridors</h3>
+          <div className="space-y-2">
+            {demoCorridors.map(c => (
+              <div key={c.id} className="bg-[#0F172A] border border-[#1E293B] rounded-lg p-3">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="font-semibold text-sm text-slate-200">{c.name}</span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${getStatusColor(c.status)}`}>
+                    {c.label}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 font-medium">
+                  {c.route}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );

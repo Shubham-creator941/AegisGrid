@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { USE_DEMO_DATA } from '../config/demo.config';
 import { useAuth } from '../contexts/AuthContext';
+import { ContextSidebar } from '../features/network/components/ContextSidebar';
 import { 
   ShieldAlert, 
   LayoutDashboard, 
@@ -22,7 +23,7 @@ export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true); // Open by default
 
   const handleLogout = () => {
     logout();
@@ -151,7 +152,7 @@ export default function AppLayout() {
 
       {/* RIGHT CONTEXTUAL DRAWER (Structural) */}
       {isDrawerOpen && (
-        <aside className="w-80 flex-shrink-0 bg-slate-950 border-l border-slate-800 flex flex-col z-20 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.5)]">
+        <aside className="w-80 flex-shrink-0 bg-[#0B1120] border-l border-slate-800 flex flex-col z-20 shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.5)]">
           <div className="h-16 border-b border-slate-800 flex items-center px-4 justify-between bg-slate-950">
             <h2 className="text-sm font-semibold tracking-wide text-slate-200 uppercase">Context Info</h2>
             <button 
@@ -161,10 +162,14 @@ export default function AppLayout() {
               <PanelRightClose size={18} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="border border-slate-800 bg-slate-900 rounded p-4 text-center">
-              <p className="text-xs text-slate-500">Contextual details will appear here.</p>
-            </div>
+          <div className="flex-1 overflow-y-auto p-4 bg-[#0B1120]">
+            {location.pathname.includes('/app/command-center') ? (
+              <ContextSidebar />
+            ) : (
+              <div className="border border-slate-800 bg-slate-900 rounded p-4 text-center">
+                <p className="text-xs text-slate-500">Contextual details will appear here.</p>
+              </div>
+            )}
           </div>
         </aside>
       )}
