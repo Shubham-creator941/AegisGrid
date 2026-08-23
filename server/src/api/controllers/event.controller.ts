@@ -78,6 +78,20 @@ export class EventController {
     }
   };
 
+  getAnalysis = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!this.eventAnalysisService) throw new Error('Service not configured');
+      const eventId = (req.params.eventId || req.params.id) as string;
+      const analysis = await this.eventAnalysisService.getAnalysis(eventId);
+      if (!analysis) {
+        return res.status(404).json({ error: 'Not Found', message: 'Analysis not found' });
+      }
+      res.status(200).json(analysis);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   createRiskAssessment = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!this.createRiskAssessmentService) throw new Error('Service not configured');
@@ -106,6 +120,20 @@ export class EventController {
       });
 
       res.status(201).json(assessment);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getRiskAssessment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!this.createRiskAssessmentService) throw new Error('Service not configured');
+      const eventId = (req.params.eventId || req.params.id) as string;
+      const assessment = await this.createRiskAssessmentService.getRiskAssessment(eventId);
+      if (!assessment) {
+        return res.status(404).json({ error: 'Not Found', message: 'Risk assessment not found' });
+      }
+      res.status(200).json(assessment);
     } catch (err) {
       next(err);
     }

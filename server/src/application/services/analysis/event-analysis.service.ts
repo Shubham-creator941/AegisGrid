@@ -58,4 +58,8 @@ export class EventAnalysisService {
       return persisted;
     });
   }
+
+  async getAnalysis(eventId: string): Promise<AIAnalysis | null> {
+    return this.aiAnalysisRepository.findByEventId(eventId);
+  }
 }

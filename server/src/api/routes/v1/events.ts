@@ -56,4 +56,7 @@ eventsRouter.post('/:eventId/evidence', requireRole([UserRole.ADMIN, UserRole.AN
 eventsRouter.get('/:eventId/evidence', evidenceController.listEvidence);
 
 eventsRouter.post('/:eventId/analyze', requireRole([UserRole.ADMIN, UserRole.ANALYST, UserRole.DECISION_MAKER]), eventController.analyzeEvent);
+eventsRouter.get('/:eventId/analysis', eventController.getAnalysis);
+
 eventsRouter.post('/:eventId/risk-assessments', requireRole([UserRole.ADMIN, UserRole.ANALYST, UserRole.DECISION_MAKER]), eventController.createRiskAssessment);
+eventsRouter.get('/:eventId/risk-assessments', eventController.getRiskAssessment);

@@ -15,8 +15,13 @@ export default function DecisionWorkspace() {
     if (!scenarioId) return;
     
     // Auto-evaluate the scenario on load (in a real app, this might be a button click or fetch existing evaluation)
-    fetch(`http://localhost:3000/api/v1/scenarios/${scenarioId}/evaluate`, {
-      method: 'POST'
+    fetch(`/api/v1/scenarios/${scenarioId}/evaluate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ analysis_type: 'IMPACT_ASSESSMENT' })
     })
       .then(res => {
         if (!res.ok) throw new Error('Evaluation failed. Check backend logs.');
@@ -42,13 +47,16 @@ export default function DecisionWorkspace() {
     setSubmitting(true);
     setDecisionStatus(null);
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/recommendations/${evaluation.recommendation.id}/decisions`, {
+      const res = await fetch(`/api/v1/recommendations/${evaluation.recommendation.id}/decision`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure auth if needed
+        },
         body: JSON.stringify({
-          decision_type: decisionType,
-          reason: decisionReason || 'Accepted by user',
-          decided_by: 'user-123', // Hardcoded for MVP
+          decision: decisionType,
+          rationale: decisionReason || 'Accepted by user',
+          selected_response_id: evaluation.recommendation.response_candidate_id
         })
       });
 

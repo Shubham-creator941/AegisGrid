@@ -33,8 +33,8 @@ export function NetworkTopology({ suppliers, facilities, corridors, supplyFlows,
     );
   }
 
-  const origins = facilities.filter(f => f.facility_type === 'ORIGIN_TERMINAL' || f.facility_type === 'PRODUCTION_SITE');
-  const destinations = facilities.filter(f => f.facility_type === 'DESTINATION_TERMINAL' || f.facility_type === 'REFINERY');
+  const origins = facilities.filter(f => f.facility_type === 'EXPORT_TERMINAL' || f.facility_type === 'PRODUCTION_SITE');
+  const destinations = facilities.filter(f => f.facility_type === 'COMMERCIAL_REFINERY' || f.facility_type === 'STRATEGIC_RESERVE');
 
   const renderStatus = (status: string) => {
     switch (status) {

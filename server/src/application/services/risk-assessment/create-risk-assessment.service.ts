@@ -61,4 +61,8 @@ export class CreateRiskAssessmentService {
       return assessment;
     });
   }
+
+  async getRiskAssessment(eventId: string): Promise<RiskAssessment | null> {
+    return this.riskAssessmentRepository.findByEventId(eventId);
+  }
 }
