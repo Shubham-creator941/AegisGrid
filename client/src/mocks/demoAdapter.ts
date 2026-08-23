@@ -24,6 +24,17 @@ export function setupDemoAdapter(client: AxiosInstance) {
       };
     };
 
+    // Auth
+    if (url.includes('/api/v1/auth/login') && method === 'post') {
+      return respond(200, {
+        success: true,
+        data: {
+          access_token: 'demo-token-12345',
+          user: { id: 'admin-1', email: 'admin@aegis.gov', role: 'ADMIN', name: 'Demo Admin' }
+        }
+      });
+    }
+
     if (url.includes('/api/v1/suppliers') && method === 'get') {
       return respond(200, { success: true, data: demoData.mockSuppliers, meta: { total: 4 } });
     }
