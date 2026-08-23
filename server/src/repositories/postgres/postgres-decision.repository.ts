@@ -20,11 +20,10 @@ export class PostgresDecisionRepository implements DecisionRepository {
     const keys = Object.keys(entity);
     const values = Object.values(entity);
     
-    const columns = ['id', ...keys, 'created_at', 'updated_at'];
+    const columns = ['id', ...keys];
     const placeholders = columns.map((_, i) => `$${i + 1}`);
-    const now = new Date();
     
-    const insertValues = [id, ...values, now, now];
+    const insertValues = [id, ...values];
     
     const query = `
       INSERT INTO human_decisions (${columns.join(', ')})
@@ -44,8 +43,9 @@ export class PostgresDecisionRepository implements DecisionRepository {
     const values = Object.values(entity);
     const now = new Date();
     
-    setClauses.push(`updated_at = $${keys.length + 2}`);
-    values.push(now);
+    // updated_at does not exist on this table
+    // setClauses.push(`updated_at = $${keys.length + 2}`);
+    // values.push(now);
     
     const query = `
       UPDATE human_decisions
@@ -62,7 +62,7 @@ export class PostgresDecisionRepository implements DecisionRepository {
     const offset = (page - 1) * pageSize;
     const [dataResult, countResult] = await Promise.all([
       this.db.query<Decision>(
-        'SELECT * FROM human_decisions ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+        'SELECT * FROM human_decisions ORDER BY decided_at DESC LIMIT $1 OFFSET $2',
         [pageSize, offset]
       ),
       this.db.query<{count: string}>('SELECT COUNT(*) FROM human_decisions')

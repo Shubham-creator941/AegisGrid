@@ -20,11 +20,10 @@ export class PostgresConstraintEvaluationRepository implements ConstraintEvaluat
     const keys = Object.keys(entity);
     const values = Object.values(entity);
     
-    const columns = ['id', ...keys, 'created_at', 'updated_at'];
+    const columns = ['id', ...keys];
     const placeholders = columns.map((_, i) => `$${i + 1}`);
-    const now = new Date();
     
-    const insertValues = [id, ...values, now, now];
+    const insertValues = [id, ...values];
     
     const query = `
       INSERT INTO constraint_evaluations (${columns.join(', ')})
@@ -44,8 +43,9 @@ export class PostgresConstraintEvaluationRepository implements ConstraintEvaluat
     const values = Object.values(entity);
     const now = new Date();
     
-    setClauses.push(`updated_at = $${keys.length + 2}`);
-    values.push(now);
+    // updated_at does not exist on this table
+    // setClauses.push(`updated_at = $${keys.length + 2}`);
+    // values.push(now);
     
     const query = `
       UPDATE constraint_evaluations

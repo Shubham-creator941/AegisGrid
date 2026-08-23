@@ -20,11 +20,11 @@ export class PostgresEvaluationRepository implements EvaluationRepository {
     const keys = Object.keys(entity);
     const values = Object.values(entity);
     
-    const columns = ['id', ...keys, 'created_at', 'updated_at'];
+    const columns = ['id', ...keys, 'created_at'];
     const placeholders = columns.map((_, i) => `$${i + 1}`);
     const now = new Date();
     
-    const insertValues = [id, ...values, now, now];
+    const insertValues = [id, ...values, now];
     
     const query = `
       INSERT INTO scenario_evaluations (${columns.join(', ')})
@@ -44,8 +44,9 @@ export class PostgresEvaluationRepository implements EvaluationRepository {
     const values = Object.values(entity);
     const now = new Date();
     
-    setClauses.push(`updated_at = $${keys.length + 2}`);
-    values.push(now);
+    // updated_at does not exist on this table
+    // setClauses.push(`updated_at = $${keys.length + 2}`);
+    // values.push(now);
     
     const query = `
       UPDATE scenario_evaluations

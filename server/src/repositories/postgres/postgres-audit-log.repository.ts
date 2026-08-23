@@ -18,13 +18,19 @@ export class PostgresAuditLogRepository implements AuditLogRepository {
   async create(entity: Omit<AuditLog, 'id' | 'created_at' | 'updated_at'>): Promise<AuditLog> {
     const id = randomUUID();
     const keys = Object.keys(entity);
-    const values = Object.values(entity);
+    const values = Object.values(entity).map((val, i) => {
+      const key = keys[i];
+      if (['before_state', 'after_state', 'metadata'].includes(key)) {
+        return val !== undefined && val !== null ? JSON.stringify(val) : null;
+      }
+      return val;
+    });
     
-    const columns = ['id', ...keys, 'created_at', 'updated_at'];
+    const columns = ['id', ...keys, 'created_at'];
     const placeholders = columns.map((_, i) => `$${i + 1}`);
     const now = new Date();
     
-    const insertValues = [id, ...values, now, now];
+    const insertValues = [id, ...values, now];
     
     const query = `
       INSERT INTO audit_logs (${columns.join(', ')})
@@ -32,6 +38,7 @@ export class PostgresAuditLogRepository implements AuditLogRepository {
       RETURNING *
     `;
     
+    console.log("INSERTING AUDIT LOG:", insertValues, query);
     const result = await this.db.query<AuditLog>(query, insertValues);
     return result.rows[0];
   }
@@ -41,11 +48,18 @@ export class PostgresAuditLogRepository implements AuditLogRepository {
     if (keys.length === 0) return this.findById(id);
 
     const setClauses = keys.map((key, i) => `${key} = $${i + 2}`);
-    const values = Object.values(entity);
+    const values = Object.values(entity).map((val, i) => {
+      const key = keys[i];
+      if (['before_state', 'after_state', 'metadata'].includes(key)) {
+        return val !== undefined && val !== null ? JSON.stringify(val) : null;
+      }
+      return val;
+    });
     const now = new Date();
     
-    setClauses.push(`updated_at = $${keys.length + 2}`);
-    values.push(now);
+    // updated_at does not exist on this table
+    // setClauses.push(`updated_at = $${keys.length + 2}`);
+    // values.push(now);
     
     const query = `
       UPDATE audit_logs
