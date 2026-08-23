@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { config } from '../config';
+import { setupDemoAdapter } from '../mocks/demoAdapter';
 
 export const apiClient = axios.create({
   baseURL: config.apiUrl,
@@ -7,6 +8,8 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+setupDemoAdapter(apiClient);
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('aegis_token');

@@ -5,10 +5,11 @@ import { EvaluationsApi } from '../features/evaluations/api/evaluations.api';
 import { DecisionsApi } from '../features/decisions/api/decisions.api';
 import { DecisionType } from 'shared';
 import { CheckCircle, AlertTriangle, AlertCircle, ArrowLeft, Activity, Info } from 'lucide-react';
+import { USE_DEMO_DATA } from '../config/demo.config';
 
 export default function Recommendations() {
   const [searchParams] = useSearchParams();
-  const evaluationId = searchParams.get('evaluationId');
+  const evaluationId = searchParams.get('evaluationId') || (USE_DEMO_DATA ? 'eval-1' : null);
   const navigate = useNavigate();
 
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);

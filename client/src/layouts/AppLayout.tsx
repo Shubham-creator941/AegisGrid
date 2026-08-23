@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { USE_DEMO_DATA } from '../config/demo.config';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   ShieldAlert, 
@@ -124,10 +125,12 @@ export default function AppLayout() {
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${USE_DEMO_DATA ? 'bg-amber-400' : 'bg-emerald-400'} opacity-75`}></span>
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${USE_DEMO_DATA ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
               </span>
-              <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">Operational</span>
+              <span className="text-xs font-medium text-slate-400 tracking-wide uppercase">
+                {USE_DEMO_DATA ? 'DEMO MODE' : 'OPERATIONAL'}
+              </span>
             </div>
             
             <button 
