@@ -3,7 +3,7 @@ import type { AuditLog, PaginatedResult, AuditFilters } from '../features/audit/
 import { AuditApi } from '../features/audit/api/audit.api';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from 'shared';
-import { ShieldAlert, Search, X, ChevronLeft, ChevronRight, Activity, Clock, User, Box, ArrowRight, ShieldCheck, FileText } from 'lucide-react';
+import { ShieldAlert, Search, X, ChevronLeft, ChevronRight, Activity, Clock, User, Box, ShieldCheck, FileText } from 'lucide-react';
 
 export default function Audit() {
   const { user } = useAuth();
@@ -320,33 +320,22 @@ export default function Audit() {
 
                 {/* Specific formatting for decision traceability if detected */}
                 {selectedRecord.entity_type === 'Decision' && selectedRecord.after_state && typeof selectedRecord.after_state === 'object' && (
-                  <div className="border-t border-slate-800 pt-5 mt-5">
-                    <div className="text-[10px] text-purple-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <ArrowRight size={12} /> Decision Traceability
-                    </div>
-                    <div className="bg-purple-950/20 border border-purple-900/30 rounded-lg p-3 space-y-3">
-                      {/* @ts-ignore */}
-                      {selectedRecord.after_state.decision_type && (
-                        <div>
-                          <div className="text-xs text-slate-500">Decision Type</div>
-                          {/* @ts-ignore */}
-                          <div className="text-sm font-semibold text-slate-200">{selectedRecord.after_state.decision_type}</div>
-                        </div>
-                      )}
+                  <div className="mt-6">
+                    <div className="bg-[#2D1B4E]/30 border border-[#4C2889]/50 rounded-lg p-4 space-y-4">
                       {/* @ts-ignore */}
                       {selectedRecord.after_state.selected_response_id && (
                         <div>
-                          <div className="text-xs text-slate-500">Selected Response Candidate ID</div>
+                          <div className="text-[11px] text-[#91A4BF] mb-1">Selected Response Candidate ID</div>
                           {/* @ts-ignore */}
-                          <div className="text-sm font-mono text-slate-300">{selectedRecord.after_state.selected_response_id}</div>
+                          <div className="text-sm font-mono text-[#E6EDF7] font-semibold">{selectedRecord.after_state.selected_response_id}</div>
                         </div>
                       )}
                       {/* @ts-ignore */}
                       {selectedRecord.after_state.reason && (
                         <div>
-                          <div className="text-xs text-slate-500">Rationale</div>
+                          <div className="text-[11px] text-[#91A4BF] mb-1">Rationale</div>
                           {/* @ts-ignore */}
-                          <div className="text-sm text-slate-300 italic">"{selectedRecord.after_state.reason}"</div>
+                          <div className="text-sm text-[#E6EDF7] italic">"{selectedRecord.after_state.reason}"</div>
                         </div>
                       )}
                     </div>
@@ -355,12 +344,12 @@ export default function Audit() {
 
                 {/* Raw States */}
                 {selectedRecord.before_state && Object.keys(selectedRecord.before_state).length > 0 && (
-                  <div>
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
-                      <span>Before State</span>
+                  <div className="mt-6">
+                    <div className="text-[10px] text-[#657994] font-bold uppercase tracking-wider mb-2">
+                      BEFORE STATE
                     </div>
-                    <div className="bg-slate-950 rounded-lg border border-slate-800 p-3 max-h-48 overflow-auto">
-                      <pre className="text-xs font-mono text-slate-400">
+                    <div className="bg-[#060B18] rounded-lg border border-[#1E304D] p-4 max-h-48 overflow-x-auto overflow-y-auto">
+                      <pre className="text-[11px] font-mono text-[#91A4BF]">
                         {JSON.stringify(selectedRecord.before_state, null, 2)}
                       </pre>
                     </div>
@@ -368,12 +357,12 @@ export default function Audit() {
                 )}
 
                 {selectedRecord.after_state && Object.keys(selectedRecord.after_state).length > 0 && (
-                  <div>
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
-                      <span>After State</span>
+                  <div className="mt-6">
+                    <div className="text-[10px] text-[#657994] font-bold uppercase tracking-wider mb-2">
+                      AFTER STATE
                     </div>
-                    <div className="bg-slate-950 rounded-lg border border-slate-800 p-3 max-h-48 overflow-auto">
-                      <pre className="text-xs font-mono text-slate-400">
+                    <div className="bg-[#060B18] rounded-lg border border-[#1E304D] p-4 max-h-48 overflow-x-auto overflow-y-auto">
+                      <pre className="text-[11px] font-mono text-[#91A4BF]">
                         {JSON.stringify(selectedRecord.after_state, null, 2)}
                       </pre>
                     </div>
@@ -381,10 +370,12 @@ export default function Audit() {
                 )}
 
                 {selectedRecord.metadata && Object.keys(selectedRecord.metadata).length > 0 && (
-                  <div>
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Metadata</div>
-                    <div className="bg-slate-950 rounded-lg border border-slate-800 p-3 overflow-auto">
-                      <pre className="text-xs font-mono text-slate-400">
+                  <div className="mt-6">
+                    <div className="text-[10px] text-[#657994] font-bold uppercase tracking-wider mb-2">
+                      METADATA
+                    </div>
+                    <div className="bg-[#060B18] rounded-lg border border-[#1E304D] p-4 overflow-x-auto overflow-y-auto">
+                      <pre className="text-[11px] font-mono text-[#91A4BF]">
                         {JSON.stringify(selectedRecord.metadata, null, 2)}
                       </pre>
                     </div>

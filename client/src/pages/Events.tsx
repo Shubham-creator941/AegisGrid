@@ -1,112 +1,133 @@
 import { useState } from 'react';
 import { 
+  Search, 
   ShieldAlert, 
   AlertTriangle, 
   Eye, 
-  AlertCircle, 
-  ChevronRight, 
-  Box,
-  FileText
+  ChevronRight
 } from 'lucide-react';
-import { useEventsList } from '../features/events/hooks/useEvents';
-import { EventDetail } from '../features/events/components/EventDetail';
-import { EvidenceList } from '../features/events/components/EvidenceList';
-import { AnalysisWorkspace } from '../features/analysis/components/AnalysisWorkspace';
-import { BrainCircuit } from 'lucide-react';
-const format = (date: Date, _fmt?: string) => date.toLocaleDateString();
-import type { Event } from '../features/events/api/events.api';
+import { EventWorkspace } from '../features/events/components/EventWorkspace';
+
+// --- MOCK DATA ---
+const DEMO_EVENTS = [
+  {
+    id: 'ev-1',
+    title: 'Strait of Hormuz Blockade',
+    location: 'Strait of Hormuz',
+    date: '23/8/2026',
+    severity: 'CRITICAL',
+    status: 'ANALYZED'
+  },
+  {
+    id: 'ev-2',
+    title: 'Red Sea Shipping Disruption',
+    location: 'Bab-el-Mandeb',
+    date: '23/8/2026',
+    severity: 'ELEVATED',
+    status: 'ANALYZED'
+  },
+  {
+    id: 'ev-3',
+    title: 'Taiwan Strait Transit Risk',
+    location: 'Taiwan Strait',
+    date: '22/8/2026',
+    severity: 'MONITORING',
+    status: 'ACTIVE'
+  }
+];
 
 export default function Events() {
-  const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
-  const [activeTab, setActiveTab] = useState<'EVIDENCE' | 'ANALYSIS'>('ANALYSIS');
-  const { data: events, loading, error } = useEventsList();
+  const [selectedEventId, setSelectedEventId] = useState<string>('ev-1');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const getSeverityConfig = (severity: string) => {
-    const s = severity.toUpperCase();
-    if (s === 'CRITICAL') return { color: 'text-red-400', icon: <ShieldAlert size={14} className="text-red-400" /> };
-    if (s === 'WARNING') return { color: 'text-amber-400', icon: <AlertTriangle size={14} className="text-amber-400" /> };
-    if (s === 'MONITORING') return { color: 'text-blue-400', icon: <Eye size={14} className="text-blue-400" /> };
-    return { color: 'text-slate-400', icon: <AlertCircle size={14} className="text-slate-400" /> };
-  };
-
-  const selectedEvent = events.find(e => e.id === selectedEventId);
+  const filteredEvents = DEMO_EVENTS.filter(e => 
+    e.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    e.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="h-full flex flex-col w-full">
-      <div className="mb-6 px-4 pt-2">
-        <h1 className="text-xl font-semibold text-slate-200">Threat & Event Monitoring</h1>
-        <p className="text-sm text-slate-500 mt-1">Operational view of geopolitical and logistics disruptions.</p>
+    <div className="h-full flex flex-col w-full bg-[#060B18] text-[#E6EDF7] font-sans">
+      {/* PAGE HEADER */}
+      <div className="mb-6 shrink-0">
+        <h1 className="text-2xl font-semibold text-[#E6EDF7] tracking-wide mb-1">Threat & Event Monitoring</h1>
+        <p className="text-[13px] text-[#91A4BF]">Operational view of geopolitical and logistics disruptions.</p>
       </div>
 
-      <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 pb-6">
+      {/* MAIN CONTENT LAYOUT */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
         
-        {/* Master List Column */}
-        <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-lg flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-slate-800 bg-slate-800/30">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Active Events</h2>
-            <input 
-              type="text" 
-              placeholder="Filter events..."
-              disabled
-              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-slate-300 focus:outline-none focus:border-slate-500 disabled:opacity-50"
-            />
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            {loading && (
-              <div className="flex flex-col gap-2 p-4">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-20 bg-slate-800 animate-pulse rounded border border-slate-700"></div>
-                ))}
+        {/* LEFT COLUMN: ACTIVE EVENTS PANEL */}
+        <div className="w-full lg:w-[28%] flex flex-col bg-[#0B1224] border border-[#1E304D] rounded-xl overflow-hidden shrink-0 shadow-lg">
+          <div className="p-4 border-b border-[#1E304D] bg-[#0E172B]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-bold text-[#E6EDF7] uppercase tracking-wider">ACTIVE EVENTS</h2>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FF4545]/10 border border-[#FF4545]/30 text-[#FF4545]">
+                <span className="text-[9px] font-bold uppercase tracking-wider">1 Critical</span>
               </div>
-            )}
+            </div>
             
-            {error && (
-              <div className="p-4 text-sm text-red-400 flex items-start gap-2">
-                <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                <div>
-                  <div className="font-semibold mb-1">Unable to load events</div>
-                  <div className="text-xs opacity-80">Event monitoring data could not be retrieved. ({error})</div>
-                </div>
-              </div>
-            )}
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#657994]" />
+              <input 
+                type="text" 
+                placeholder="Filter events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#060B18] border border-[#1E304D] rounded pl-9 pr-3 py-2 text-xs text-[#E6EDF7] placeholder-[#657994] focus:outline-none focus:border-[#2F8CFF]/50 transition-colors"
+              />
+            </div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto">
+            {filteredEvents.map((ev) => {
+              const isSelected = selectedEventId === ev.id;
+              const isCritical = ev.severity === 'CRITICAL';
+              const isElevated = ev.severity === 'ELEVATED';
+              
+              let sevColor = 'text-[#657994]';
+              let Icon = Eye;
+              let borderAccent = 'border-transparent';
+              
+              if (isCritical) {
+                sevColor = 'text-[#FF4545]';
+                Icon = ShieldAlert;
+                borderAccent = 'border-[#FF4545]';
+              } else if (isElevated) {
+                sevColor = 'text-[#FFB000]';
+                Icon = AlertTriangle;
+                borderAccent = 'border-[#FFB000]';
+              }
 
-            {!loading && !error && events.length === 0 && (
-              <div className="p-8 text-center">
-                <p className="text-sm text-slate-300 font-medium">No active events</p>
-                <p className="text-xs text-slate-500 mt-2">No geopolitical or logistics events are currently available for investigation.</p>
-              </div>
-            )}
-
-            {!loading && !error && events.map((ev: Event) => {
-              const sev = getSeverityConfig(ev.severity);
               return (
                 <button
                   key={ev.id}
                   onClick={() => setSelectedEventId(ev.id)}
-                  className={`w-full text-left p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors flex flex-col gap-2 ${
-                    selectedEventId === ev.id ? 'bg-slate-800/80 border-l-2 border-l-blue-500' : 'border-l-2 border-l-transparent'
+                  className={`w-full text-left p-4 border-b border-[#1E304D] hover:bg-[#121D34] transition-colors flex flex-col gap-2 relative ${
+                    isSelected ? 'bg-[#121D34]/80 border-l-[3px] shadow-[inset_15px_0_20px_-15px_rgba(255,69,69,0.1)] ' + borderAccent : 'border-l-[3px] border-l-transparent'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between mb-1">
                     <div className="flex items-center gap-1.5">
-                      {sev.icon}
-                      <span className={`text-[10px] font-bold uppercase tracking-wider ${sev.color}`}>
+                      <Icon size={14} className={sevColor} />
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${sevColor}`}>
                         {ev.severity}
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded font-semibold border border-slate-700 uppercase">
-                      {ev.status}
-                    </span>
+                    {ev.status === 'ANALYZED' && (
+                      <span className="text-[9px] text-[#91A4BF] bg-[#1E304D]/50 px-1.5 py-0.5 rounded font-bold uppercase tracking-widest border border-[#1E304D]">
+                        {ev.status}
+                      </span>
+                    )}
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-200 line-clamp-1 pr-2">{ev.title}</span>
-                    <ChevronRight size={16} className="text-slate-600 shrink-0" />
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-sm font-semibold text-[#E6EDF7] leading-tight">{ev.title}</span>
+                    {isSelected && <ChevronRight size={16} className="text-[#657994] shrink-0 mt-0.5" />}
                   </div>
                   
-                  <div className="flex items-center justify-between text-xs text-slate-500 mt-1">
-                    <span className="line-clamp-1">{ev.affected_region || 'Unknown Location'}</span>
-                    <span className="shrink-0">{ev.detected_at ? format(new Date(ev.detected_at)) : '-'}</span>
+                  <div className="flex items-center justify-between text-xs text-[#91A4BF] mt-1">
+                    <span className="truncate">{ev.location}</span>
+                    <span className="shrink-0">{ev.date}</span>
                   </div>
                 </button>
               );
@@ -114,45 +135,9 @@ export default function Events() {
           </div>
         </div>
 
-        {/* Detail Column */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-lg overflow-hidden relative flex flex-col">
-          {!selectedEvent ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-500">
-              <Box size={48} className="mb-4 opacity-50" />
-              <p>Select an event from the list to investigate.</p>
-            </div>
-          ) : (
-            <div className="flex flex-col h-full overflow-hidden">
-              <div className="p-6 border-b border-slate-800 bg-slate-900/50 shrink-0">
-                <EventDetail event={selectedEvent} />
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-6 bg-slate-950/50">
-                <div className="flex items-center gap-6 border-b border-slate-800 mb-6 pb-2">
-                  <button 
-                    onClick={() => setActiveTab('EVIDENCE')}
-                    className={`flex items-center gap-2 pb-2 -mb-[9px] border-b-2 font-semibold text-sm transition-colors ${activeTab === 'EVIDENCE' ? 'border-blue-500 text-slate-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-                  >
-                    <FileText size={16} />
-                    Evidence Log
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('ANALYSIS')}
-                    className={`flex items-center gap-2 pb-2 -mb-[9px] border-b-2 font-semibold text-sm transition-colors ${activeTab === 'ANALYSIS' ? 'border-purple-500 text-slate-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-                  >
-                    <BrainCircuit size={16} />
-                    AI Analysis & Risk
-                  </button>
-                </div>
-                
-                {activeTab === 'EVIDENCE' ? (
-                  <EvidenceList eventId={selectedEvent.id} />
-                ) : (
-                  <AnalysisWorkspace event={selectedEvent} />
-                )}
-              </div>
-            </div>
-          )}
+        {/* RIGHT COLUMN: EVENT DETAIL WORKSPACE */}
+        <div className="w-full lg:w-[72%] bg-[#0B1224] border border-[#1E304D] rounded-xl overflow-hidden shadow-lg p-6 flex flex-col min-h-0">
+          <EventWorkspace />
         </div>
 
       </div>
