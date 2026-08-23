@@ -1,30 +1,59 @@
-# OOSC 4.0 - P1
+# AegisGrid
 
-AI-Driven Energy Supply Chain Resilience for Import-Dependent Economies.
+> **AI-Driven Energy Supply Chain Resilience for Import-Dependent Economies**
 
-## Purpose
-This project is an AI-driven platform for managing energy supply chain resilience for import-dependent economies.
+**AegisGrid** is an AI-assisted energy supply-chain intelligence and decision-support platform for monitoring geopolitical and logistics disruptions, modelling their operational impact, evaluating mitigation scenarios, recommending executable responses, and recording auditable human decisions.
 
-## Repository Structure
-- `client/`: Presentation layer (React, Vite, Tailwind CSS)
-- `server/`: Application + domain + infrastructure (Node.js, Express, TypeScript)
-- `shared/`: Contract-level shared types
-- `docs/`: Specifications and project documentation
+### Monitor disruption. Model consequences. Decide with confidence.
 
-## Prerequisites
-- Node.js (v18+)
-- npm
+---
 
-## Installation
-From the root directory, install all workspace dependencies:
-```bash
-npm install
+## Problem Statement
+
+India imports approximately **88% of its crude oil**, with a significant proportion exposed to strategic maritime chokepoints such as the **Strait of Hormuz**.
+
+Events including geopolitical escalation, sanctions, shipping attacks, corridor closures, and Red Sea disruption can rapidly affect:
+
+- crude availability,
+- logistics capacity,
+- freight routes,
+- refineries,
+- strategic reserves,
+- supply continuity,
+- energy prices.
+
+Traditional supply-chain planning tools are generally not designed to combine real-time geopolitical intelligence, network exposure, disruption modelling, rerouting recommendations, and human decision workflows in one operational system.
+
+AegisGrid addresses this problem through an integrated energy-resilience workflow.
+
+---
+
+## Core Workflow
+
+```text
+Global Energy Network
+        ↓
+Threat / Event Detection
+        ↓
+Evidence Collection
+        ↓
+AI Analysis
+        ↓
+Risk Assessment
+        ↓
+Scenario Modelling
+        ↓
+Evaluation
+        ↓
+Impact & Constraints
+        ↓
+Response Candidates
+        ↓
+Scoring & Ranking
+        ↓
+Recommendation
+        ↓
+Human Decision
+        ↓
+Audit Trail
 ```
-
-## Development Commands
-These commands can be run from the root directory to execute across workspaces:
-
-- `npm run dev`: Starts development servers (where applicable)
-- `npm run build`: Builds the applications
-- `npm run typecheck`: Runs TypeScript typechecking without emitting files
-- `npm run test`: Runs the test suite (currently a placeholder)
