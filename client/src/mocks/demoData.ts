@@ -103,6 +103,10 @@ export const mockScenarios: Scenario[] = [
     description: 'Complete closure of Strait of Hormuz for 30 days.',
     event_id: 'evt-1',
     status: 'EVALUATED',
+    scenario_version: 1,
+    start_time: new Date().toISOString(),
+    end_time: new Date().toISOString(),
+    created_by: 'system',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }
@@ -150,7 +154,7 @@ export const mockEvaluationResult: EvaluationResult = {
       action_type: 'REROUTE',
       name: 'Reroute via Petroline',
       description: 'Divert Saudi crude via East-West pipeline to Red Sea',
-      parameters: { capacity_diverted: 800000 },
+      parameters: { capacity_diverted: 800000, affected_node_ids: ['cor-3', 'fac-1'] },
       status: 'FEASIBLE'
     },
     {
@@ -159,7 +163,7 @@ export const mockEvaluationResult: EvaluationResult = {
       action_type: 'STRATEGIC_RESERVE',
       name: 'Release Strategic Reserves',
       description: 'Release crude from Visakhapatnam & Mangalore SPR',
-      parameters: { release_volume: 500000 },
+      parameters: { release_volume: 500000, affected_node_ids: ['fac-6', 'fac-7'] },
       status: 'FEASIBLE'
     }
   ],

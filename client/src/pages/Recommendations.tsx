@@ -5,6 +5,8 @@ import { EvaluationsApi } from '../features/evaluations/api/evaluations.api';
 import { DecisionsApi } from '../features/decisions/api/decisions.api';
 import { DecisionType } from 'shared';
 import { CheckCircle, AlertTriangle, AlertCircle, ArrowLeft, Activity, Info } from 'lucide-react';
+import { useNetworkOverview } from '../features/network/hooks/useNetwork';
+import { GeographicMap } from '../features/network/components/GeographicMap';
 import { USE_DEMO_DATA } from '../config/demo.config';
 
 export default function Recommendations() {
@@ -23,6 +25,8 @@ export default function Recommendations() {
   const [decisionReason, setDecisionReason] = useState<string>('');
   const [decisionStatus, setDecisionStatus] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const { data: networkData, loading: networkLoading } = useNetworkOverview();
 
   useEffect(() => {
     if (!evaluationId) {
@@ -93,7 +97,7 @@ export default function Recommendations() {
     }
   };
 
-  if (loading) {
+  if (loading || networkLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-slate-400 flex items-center gap-2">
@@ -152,10 +156,55 @@ export default function Recommendations() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="flex flex-col">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* LEFT: CANDIDATE LIST */}
-          <div className="lg:col-span-5 space-y-4">
+          {/* LEFT: DECISION IMPACT */}
+          <div className="lg:col-span-12 xl:col-span-7 space-y-4">
+            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Decision Impact</h2>
+            <p className="text-xs text-slate-500 mb-4">Network effect of selected response</p>
+            
+            <div className="border border-slate-800 rounded-lg overflow-hidden">
+              <GeographicMap 
+                suppliers={networkData?.suppliers || []}
+                facilities={networkData?.facilities || []}
+                corridors={networkData?.corridors || []}
+                supplyFlows={networkData?.supplyFlows || []}
+                highlightedNodeIds={selectedCandidate?.parameters?.affected_node_ids as string[] | undefined}
+                isSelectedRecommended={isSelectedRecommended}
+                selectedCandidateName={selectedCandidate?.name}
+              />
+            </div>
+            
+            {selectedCandidate ? (
+              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-5">
+                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Contextual Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-[10px] text-slate-500 uppercase mb-1">Target Action</div>
+                    <div className="text-sm font-medium text-slate-200">{selectedCandidate.action_type || 'N/A'}</div>
+                  </div>
+                  {selectedCandidate.parameters && Object.entries(selectedCandidate.parameters)
+                    .filter(([key]) => key !== 'affected_node_ids')
+                    .map(([key, value]) => (
+                    <div key={key}>
+                      <div className="text-[10px] text-slate-500 uppercase mb-1">{key.replace(/_/g, ' ')}</div>
+                      <div className="text-sm font-mono text-slate-200">{String(value)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-900/30 border border-slate-800/50 rounded-lg p-5 text-center">
+                <p className="text-sm text-slate-500">Select a candidate to view network impact</p>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT: CANDIDATES & DETAIL */}
+          <div className="lg:col-span-12 xl:col-span-5 space-y-6 flex flex-col h-[700px]">
+            {/* CANDIDATE LIST */}
+            <div className="space-y-4 overflow-y-auto shrink-0 max-h-[300px] border border-slate-800 bg-slate-900/30 rounded-xl p-4">
             <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">Candidate Responses</h2>
             
             <div className="space-y-3">
@@ -221,10 +270,10 @@ export default function Recommendations() {
                 );
               })}
             </div>
-          </div>
+            </div>
 
-          {/* RIGHT: DETAIL & DECISION */}
-          <div className="lg:col-span-7 space-y-6">
+            {/* Candidate Detail */}
+            <div className="flex-1 overflow-y-auto">
             
             {/* Candidate Detail */}
             {selectedCandidate ? (
@@ -346,9 +395,12 @@ export default function Recommendations() {
                 <p className="text-slate-500 text-sm mt-2 max-w-sm">Choose a response candidate from the left panel to view detailed operational metrics and constraint analysis.</p>
               </div>
             )}
+            </div>
+          </div>
+        </div>
 
-            {/* DECISION INTERFACE */}
-            <div className="border-t-[3px] border-purple-500/50 bg-slate-900 rounded-xl overflow-hidden shadow-lg mt-8">
+        {/* DECISION INTERFACE */}
+        <div className="border-t-[3px] border-purple-500/50 bg-slate-900 rounded-xl overflow-hidden shadow-lg mt-8">
               <div className="bg-slate-800/80 px-6 py-4 border-b border-slate-700">
                 <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-purple-500"></div>
@@ -447,7 +499,6 @@ export default function Recommendations() {
               </div>
             </div>
 
-          </div>
         </div>
       )}
     </div>
