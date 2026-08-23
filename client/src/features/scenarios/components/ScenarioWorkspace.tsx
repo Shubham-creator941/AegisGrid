@@ -44,8 +44,9 @@ export default function ScenarioWorkspace() {
       const evalResult = await evaluateScenario(scenario.id, idempotencyKey);
       
       // Navigate to evaluation workspace
-      if (evalResult && evalResult.id) {
-        navigate(`/app/evaluations?evaluationId=${evalResult.id}`);
+      const evalId = evalResult?.evaluation?.id || evalResult?.id;
+      if (evalId) {
+        navigate(`/app/evaluations?evaluationId=${evalId}`);
       }
     } catch (err) {
       console.error('Evaluation failed:', err);

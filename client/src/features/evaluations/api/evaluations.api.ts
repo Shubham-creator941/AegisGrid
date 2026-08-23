@@ -39,6 +39,6 @@ export interface EvaluationResult {
 }
 
 export const EvaluationsApi = {
-  getEvaluationStatus: (id: string) => apiClient.get<Evaluation>(`/api/v1/evaluations/${id}`).then(res => res.data),
+  getEvaluationStatus: (id: string) => apiClient.get<{ success: boolean, data: Evaluation }>(`/api/v1/evaluations/${id}`).then(res => res.data.data),
   getEvaluationResult: (id: string) => apiClient.get<{ success: boolean, data: EvaluationResult }>(`/api/v1/evaluations/${id}/result`).then(res => res.data.data),
 };
