@@ -14,11 +14,37 @@ export class DeterministicConstraintEngine implements ConstraintEngine {
     // "use the smallest deterministic source-supported behavior"), we return a deterministic 
     // feasible result.
 
+    const candidate = input.responseCandidate;
+    const params = candidate.parameters as any || {};
+    const volume = params.volume || 0;
+    const altFlowId = params.altFlowId;
+    
+    // Default feasible, accumulate violations
+    let feasible = true;
+    const violations: string[] = [];
+
+    // POSITIVE VOLUME
+    if (volume <= 0) {
+      feasible = false;
+      violations.push('Volume must be positive');
+    }
+
+    // DISRUPTION EXCLUSION
+    const snapshotData = input.networkSnapshot.snapshot_data as any || {};
+    const affectedFlowIds = snapshotData.affected_flow_ids || [];
+    if (altFlowId && affectedFlowIds.includes(altFlowId)) {
+      feasible = false;
+      violations.push('Cannot use a disrupted network element');
+    }
+
+    // The authoritative specification ("Context of aegis.pdf") defines the ConstraintEngine 
+    // contract. We now apply the exact constraints from PAD-003 Section 7.
+
     return {
       id: `eval-${input.responseCandidate.id}`,
       response_candidate_id: input.responseCandidate.id,
-      feasible: true,
-      violations: {}, // No invented violations
+      feasible: feasible,
+      violations: violations,
       constraint_version: '1.0.0-deterministic',
       evaluated_at: new Date(0) // Deterministic epoch
     };

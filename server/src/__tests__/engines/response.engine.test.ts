@@ -145,4 +145,43 @@ suite('DeterministicResponseEngine', () => {
       (err: any) => err instanceof BusinessRuleError && err.code === 'INVALID_RESPONSE_INPUT'
     );
   });
+
+  test('PAD-003-3: zero-shortfall produces no candidates', async () => {
+    const inputWithZeroShortfall = {
+      ...validBaseInput,
+      simulationResult: { ...validBaseInput.simulationResult, shortfall: 0 }
+    };
+    const result = await engine.generate(inputWithZeroShortfall);
+    assert.deepStrictEqual(result, []);
+  });
+
+  test('PAD-003-4: candidate volume formula perfectly applies min(shortfall, available_capacity)', async () => {
+    const mockNetworkSnapshotWithFlows = {
+      id: 'network-1',
+      snapshot_version: 1,
+      created_at: new Date(),
+      created_by: 'user-1',
+      description: 'Test',
+      snapshot_data: {
+        affected_flow_ids: ['flow-1'],
+        supply_flows: [
+          { id: 'flow-1', destination_facility_id: 'dest-1', commodity: 'oil', capacity: 100, baseline_volume: 100, supplier_id: 'supp-1' },
+          { id: 'flow-2', destination_facility_id: 'dest-1', commodity: 'oil', capacity: 200, baseline_volume: 50, supplier_id: 'supp-1' } // available: 150
+        ],
+        suppliers: [{ id: 'supp-1', status: 'ACTIVE' }]
+      }
+    };
+    const customInput = {
+      ...validBaseInput,
+      simulationResult: {
+        ...validBaseInput.simulationResult,
+        shortfall: 100,
+        network_state: mockNetworkSnapshotWithFlows.snapshot_data,
+        affected_flow_ids: ['flow-1']
+      }
+    };
+    const result = await engine.generate(customInput as any);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual((result[0].parameters as any).volume, 100); // min(100, 150)
+  });
 });

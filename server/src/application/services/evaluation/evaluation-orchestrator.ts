@@ -103,10 +103,11 @@ export class EvaluationOrchestrator {
       scores.push(score);
     }
 
-    // 6. Ranking
+    // 6. Ranking (Only feasible candidates)
     let ranking: RankedResponse[] = [];
-    if (scores.length > 0) {
-      ranking = await this.rankingEngine.rank({ scores });
+    const feasibleScores = scores.filter((_, i) => constraints[i].feasible);
+    if (feasibleScores.length > 0) {
+      ranking = await this.rankingEngine.rank({ scores: feasibleScores });
     }
 
     // 7. Recommendation

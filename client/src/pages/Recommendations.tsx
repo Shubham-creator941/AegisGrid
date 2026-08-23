@@ -42,8 +42,8 @@ export default function Recommendations() {
           // Check for existing decision
           try {
             const decisionData = await DecisionsApi.getDecision(result.recommendation.id);
-            if (decisionData?.success) {
-              setCurrentDecision(decisionData.data);
+            if (decisionData?.success && decisionData.data?.decision) {
+              setCurrentDecision(decisionData.data.decision);
             }
           } catch (e) {
             // Ignore 404s for decision not found
@@ -137,8 +137,8 @@ export default function Recommendations() {
           Recommendation Comparison
         </h1>
         <p className="text-slate-400 text-sm mt-1 flex items-center gap-4">
-          <span>Evaluation ID: <span className="font-mono text-slate-300">{evaluationResult.evaluation.id.split('-')[0]}</span></span>
-          <span>Scenario: <span className="font-mono text-slate-300">{evaluationResult.evaluation.scenario_id.split('-')[0]}</span></span>
+          <span>Evaluation ID: <span className="font-mono text-slate-300">{evaluationResult.evaluation.id?.split('-')[0] || 'N/A'}</span></span>
+          <span>Scenario: <span className="font-mono text-slate-300">{evaluationResult.evaluation.scenario_id?.split('-')[0] || 'N/A'}</span></span>
         </p>
       </div>
 
@@ -206,7 +206,7 @@ export default function Recommendations() {
                       <div>
                         <div className="text-[10px] text-slate-500 uppercase">Score</div>
                         <div className="text-xs font-mono text-slate-300 mt-0.5">
-                          {cScore?.overall_score != null ? cScore.overall_score.toFixed(2) : 'N/A'}
+                          {cScore?.overall_score != null ? Number(cScore.overall_score).toFixed(2) : 'N/A'}
                         </div>
                       </div>
                       <div>
@@ -258,7 +258,7 @@ export default function Recommendations() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
                       <div className="text-xs text-slate-500 uppercase mb-1">Score</div>
-                      <div className="text-lg font-mono text-slate-200">{selectedScore?.overall_score != null ? selectedScore.overall_score.toFixed(2) : 'N/A'}</div>
+                      <div className="text-lg font-mono text-slate-200">{selectedScore?.overall_score != null ? Number(selectedScore.overall_score).toFixed(2) : 'N/A'}</div>
                     </div>
                     <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
                       <div className="text-xs text-slate-500 uppercase mb-1">Feasibility</div>
@@ -364,7 +364,7 @@ export default function Recommendations() {
                     <CheckCircle className="text-green-500 mx-auto mb-3" size={36} />
                     <h3 className="text-lg font-semibold text-green-400">Decision Recorded</h3>
                     <p className="text-slate-300 mt-2">
-                      <span className="font-bold text-white">{currentDecision.decision_type}</span> - Response ID: <span className="font-mono text-slate-400">{currentDecision.selected_response_id.split('-')[0]}</span>
+                      <span className="font-bold text-white">{currentDecision.decision_type}</span> - Response ID: <span className="font-mono text-slate-400">{currentDecision.selected_response_id?.split('-')[0] || 'N/A'}</span>
                     </p>
                     <div className="mt-4 inline-block bg-slate-950 border border-slate-800 px-4 py-2 rounded text-sm text-slate-400 text-left max-w-lg w-full">
                       <div className="text-xs text-slate-500 uppercase mb-1">Rationale</div>

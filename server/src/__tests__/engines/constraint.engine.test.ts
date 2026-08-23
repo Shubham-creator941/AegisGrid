@@ -57,9 +57,13 @@ suite('DeterministicConstraintEngine', () => {
   };
 
   const validBaseInput: ConstraintInput = {
-    responseCandidate: mockResponseCandidate,
-    scenarioContext: mockScenarioContext,
-    networkSnapshot: mockNetworkSnapshot
+    responseCandidate: { ...mockResponseCandidate, parameters: { volume: 100, altFlowId: 'flow-2' } },
+    scenarioContext: {
+      scenario: { id: 's1' } as any,
+      disruption: { id: 'e1' } as any,
+      simulationResult: { id: 'sim1', affected_flow_ids: ['flow-1'] } as any
+    } as any,
+    networkSnapshot: { id: 'ns1', snapshot_data: { affected_flow_ids: ['flow-1'] } } as any
   };
 
   test('valid input produces deterministic structural output (feasible: true)', async () => {
@@ -67,7 +71,7 @@ suite('DeterministicConstraintEngine', () => {
 
     assert.strictEqual(result.response_candidate_id, 'candidate-1');
     assert.strictEqual(result.feasible, true);
-    assert.deepStrictEqual(result.violations, {});
+    assert.deepStrictEqual(result.violations, []);
     assert.strictEqual(result.constraint_version, '1.0.0-deterministic');
     assert.strictEqual(result.evaluated_at.getTime(), 0);
   });

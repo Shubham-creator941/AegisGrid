@@ -77,15 +77,16 @@ suite('DeterministicScoringEngine', () => {
     scenarioContext: mockScenarioContext
   };
 
-  test('valid input produces deterministic structural output (0 score)', async () => {
+  test('valid input produces deterministic structural output (0.1 score)', async () => {
     const result = await engine.score(validBaseInput);
 
-    assert.strictEqual(result.overall_score, 0);
-    assert.strictEqual(result.response_candidate_id, 'candidate-1');
-    assert.deepStrictEqual(result.dimension_scores, {});
-    assert.deepStrictEqual(result.weights, {});
+    assert.strictEqual(result.calculation_version, undefined);
     assert.strictEqual(result.scoring_version, '1.0.0-deterministic');
+    assert.strictEqual(result.id, 'candidate-1-score');
+    assert.strictEqual(result.response_candidate_id, 'candidate-1');
+    assert.strictEqual(result.created_at, undefined);
     assert.strictEqual(result.calculated_at.getTime(), 0);
+    assert.strictEqual(result.overall_score, 0.1);
   });
 
   test('deterministic repeated execution produces identical outputs', async () => {

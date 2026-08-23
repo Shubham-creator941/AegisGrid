@@ -6,6 +6,7 @@ export interface SimulationResult {
   shortfall: number;
   reserve_level: number;
   network_state: unknown;
+  affected_flow_ids: string[];
   calculation_version: string;
   created_at: Date;
 }

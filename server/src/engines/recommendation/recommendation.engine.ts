@@ -7,7 +7,7 @@ export class DeterministicRecommendationEngine implements RecommendationEngine {
     this.validateInput(input);
 
     if (input.rankedResponses.length === 0) {
-      throw new BusinessRuleError('INVALID_RECOMMENDATION_INPUT', 'Cannot recommend from an empty ranked response list');
+      return null as any;
     }
 
     // The authoritative specification ("Context of aegis.pdf") defines that this engine 

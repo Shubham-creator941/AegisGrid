@@ -46,8 +46,19 @@ test.describe('AegisGrid System Golden Path', () => {
 
     // 6. Evaluation page — evaluation runs synchronously; wait for results
     await expect(page).toHaveURL(/.*\/app\/evaluations.*/);
+    
+    // Check if evaluation explicitly generated 0 candidates due to Specification Gap (Defect #3)
+    const noCandidatesMessage = page.getByText('No candidate responses were generated.');
     const compareRecommendationsBtn = page.locator('button, a').filter({ hasText: 'Compare Recommendations' }).first();
-    await compareRecommendationsBtn.waitFor({ state: 'visible', timeout: 30000 });
+    
+    // Wait for either the Compare button or the Empty state
+    await Promise.race([
+      compareRecommendationsBtn.waitFor({ state: 'visible', timeout: 30000 }).catch(() => {}),
+      noCandidatesMessage.waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})
+    ]);
+
+    expect(await noCandidatesMessage.isVisible(), 'BLOCKED — SPECIFICATION / PRODUCT GAP (Defect #3). The deterministic engine generated 0 candidates because generation rules are not defined in the specification. Golden Path cannot proceed to Recommendation Comparison.').toBe(false);
+
     await compareRecommendationsBtn.click();
 
     // 7. Recommendations comparison page

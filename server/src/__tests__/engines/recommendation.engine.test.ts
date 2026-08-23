@@ -73,13 +73,9 @@ suite('DeterministicRecommendationEngine', () => {
     assert.strictEqual(JSON.stringify(validBaseInput), inputSnapshot);
   });
 
-  test('empty array throws BusinessRuleError', async () => {
-    await assert.rejects(
-      async () => {
-        await engine.recommend({ rankedResponses: [] });
-      },
-      (err: any) => err instanceof BusinessRuleError && err.code === 'INVALID_RECOMMENDATION_INPUT'
-    );
+  test('empty array returns null', async () => {
+    const result = await engine.recommend({ rankedResponses: [] });
+    assert.strictEqual(result, null);
   });
 
   test('missing required input throws BusinessRuleError', async () => {

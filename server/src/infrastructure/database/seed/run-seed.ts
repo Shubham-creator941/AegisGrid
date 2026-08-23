@@ -184,7 +184,15 @@ async function runSeed() {
     console.log('Seeding Network Snapshot & Evaluation...');
     const snapshotId = deterministicId('snp', 1);
     await client.query(`INSERT INTO network_snapshots (id, created_by, description, snapshot_data) VALUES ($1, $2, $3, $4)`, 
-      [snapshotId, deterministicId('user', 1), 'Baseline network state before scenario', JSON.stringify({ note: 'Demo structural state' })]);
+      [snapshotId, deterministicId('user', 1), 'Baseline network state before scenario', JSON.stringify({
+        expected_shortfall: 500000,
+        affected_capacity: 1500000,
+        affected_flow_ids: [deterministicId('flow', 1), deterministicId('flow', 2), deterministicId('flow', 6)],
+        suppliers,
+        facilities,
+        corridors,
+        supply_flows: flows
+      })]);
 
     const evalId = deterministicId('evl', 1);
     await client.query(`INSERT INTO scenario_evaluations (id, scenario_id, network_snapshot_id, risk_assessment_id, status, engine_version, completed_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`, 

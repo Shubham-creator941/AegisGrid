@@ -17,9 +17,40 @@ export class DeterministicRankingEngine implements RankingEngine {
     // preserving the existing order (or deterministic ID sort in case of zero scores) 
     // to preserve the contract without manufacturing arbitrary sorting logic.
 
-    const ranked: RankedResponse[] = input.scores
-      // Deterministically tie-break sort by ID (smallest deterministic sort when scores are all 0)
-      .sort((a, b) => a.id.localeCompare(b.id))
+    const ranked: RankedResponse[] = [...input.scores]
+      .sort((a, b) => {
+        // 1. score DESC
+        if (a.overall_score !== b.overall_score) {
+          return b.overall_score - a.overall_score;
+        }
+
+        const aDims = a.dimension_scores as any || {};
+        const bDims = b.dimension_scores as any || {};
+
+        // 2. coverage DESC
+        const aCov = aDims.coverage || 0;
+        const bCov = bDims.coverage || 0;
+        if (aCov !== bCov) {
+          return bCov - aCov;
+        }
+
+        // 3. candidate.volume DESC
+        const aVol = aDims.candidateVolume || 0;
+        const bVol = bDims.candidateVolume || 0;
+        if (aVol !== bVol) {
+          return bVol - aVol;
+        }
+
+        // 4. candidate.type ASC
+        const aType = aDims.candidateType || '';
+        const bType = bDims.candidateType || '';
+        if (aType !== bType) {
+          return aType.localeCompare(bType);
+        }
+
+        // 5. candidate.id ASC
+        return a.response_candidate_id.localeCompare(b.response_candidate_id);
+      })
       .map((score, index) => ({
         id: `ranked-${score.response_candidate_id}`,
         evaluation_id: 'evaluation-context', // Deterministic placeholder
