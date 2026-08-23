@@ -42,8 +42,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded shadow-2xl p-8">
+    <div className="min-h-dvh bg-slate-950 flex flex-col justify-center items-center p-4">
+      <div className="w-full max-w-[420px] bg-slate-900 border border-slate-800 rounded-[var(--radius-lg)] shadow-2xl p-7 sm:p-8">
         
         <div className="flex flex-col items-center mb-8">
           <div className="w-12 h-12 bg-blue-950 text-blue-500 rounded flex items-center justify-center mb-4 border border-blue-900">
@@ -51,7 +51,7 @@ export default function Login() {
           </div>
           <h1 className="text-2xl font-semibold text-slate-100 tracking-wide">AEGISGRID</h1>
           <h2 className="text-sm font-medium text-slate-400 mt-1 uppercase tracking-widest text-center">Energy Supply Resilience</h2>
-          <p className="text-xs text-slate-500 mt-4 text-center">Monitor disruption. Model consequences. Decide with confidence.</p>
+          <p className="text-sm text-slate-500 mt-4 text-center">Monitor disruption. Model consequences. Decide with confidence.</p>
         </div>
 
         {error && (
@@ -70,7 +70,7 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full h-11 bg-slate-950 border border-slate-800 rounded-[var(--radius-md)] px-4 text-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
               placeholder="operator@aegisgrid.local"
               disabled={isLoading}
             />
@@ -85,7 +85,7 @@ export default function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full h-11 bg-slate-950 border border-slate-800 rounded-[var(--radius-md)] px-4 text-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
               placeholder="••••••••••••"
               disabled={isLoading}
             />
@@ -94,7 +94,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm py-2.5 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full h-11 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium text-sm px-4 rounded-[var(--radius-md)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {isLoading ? 'Authenticating...' : 'Authenticate'}
           </button>
@@ -102,7 +102,7 @@ export default function Login() {
 
       </div>
       
-      <div className="mt-8 text-xs text-slate-600 flex space-x-4">
+      <div className="mt-8 text-sm text-slate-500 flex flex-wrap justify-center gap-x-4 gap-y-1">
         <span>AegisGrid Operational Platform</span>
         <span>•</span>
         <span>Secure Access Only</span>

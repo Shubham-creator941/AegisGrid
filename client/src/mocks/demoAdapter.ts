@@ -62,12 +62,17 @@ export function setupDemoAdapter(client: AxiosInstance) {
       return respond(200, demoData.mockAnalysis);
     }
     if (url.includes('/api/v1/events') && method === 'get') {
-      return respond(200, { success: true, data: demoData.mockEvents, meta: { total: 1 } });
+      return respond(200, { success: true, data: demoData.mockEvents, meta: { total: demoData.mockEvents.length } });
     }
 
     // Scenarios
     if (url.match(/\/api\/v1\/scenarios\/.+\/evaluate/) && method === 'post') {
       return respond(200, { success: true, data: { evaluation: demoData.mockEvaluation, result: demoData.mockEvaluationResult } });
+    }
+    if (url.match(/\/api\/v1\/scenarios\/[^/]+$/) && method === 'get') {
+      const scenarioId = url.split('/').pop();
+      const scenario = demoData.mockScenarios.find(item => item.id === scenarioId);
+      return scenario ? respond(200, scenario) : respond(404, { error: { code: 'SCENARIO_NOT_FOUND', message: 'Scenario not found' } });
     }
     if (url.includes('/api/v1/scenarios') && method === 'get') {
       return respond(200, { success: true, data: demoData.mockScenarios, meta: { total: 1 } });
@@ -76,8 +81,6 @@ export function setupDemoAdapter(client: AxiosInstance) {
       // Mock creating a scenario
       const body = JSON.parse(config.data as string);
       return respond(201, {
-        success: true,
-        data: {
           id: `scn-${Date.now()}`,
           name: body.name,
           description: body.description,
@@ -89,7 +92,6 @@ export function setupDemoAdapter(client: AxiosInstance) {
           created_by: body.created_by,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }
       });
     }
 

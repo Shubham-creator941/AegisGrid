@@ -7,7 +7,7 @@ export default function Decisions() {
   const decisionsList = Object.values(mockDecisions);
 
   return (
-    <div className="h-full max-w-7xl mx-auto">
+    <div className="h-full w-full overflow-auto">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2">

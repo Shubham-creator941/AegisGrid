@@ -1,4 +1,5 @@
 import { Ship } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function ArrivalsTable() {
   const arrivals = [
@@ -15,9 +16,9 @@ export function ArrivalsTable() {
           <Ship size={14} className="text-[#22D3EE]" />
           Scheduled Arrivals <span className="text-slate-500 font-medium ml-1 capitalize tracking-normal">Next 72 Hours</span>
         </h3>
-        <button className="text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition-colors shrink-0">
+        <Link to="/app/network" className="text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 active:bg-slate-900 uppercase tracking-widest transition-colors shrink-0 rounded-[var(--radius-sm)] px-1.5 py-1">
           View All &rarr;
-        </button>
+        </Link>
       </div>
       <div className="flex-1 overflow-auto">
         <table className="w-full text-left border-collapse min-w-[400px]">
@@ -32,7 +33,7 @@ export function ArrivalsTable() {
           </thead>
           <tbody className="text-xs">
             {arrivals.map((row, idx) => (
-              <tr key={idx} className="border-b border-[#1E293B]/50 hover:bg-[#1E293B]/30 transition-colors">
+              <tr key={idx} className="border-b border-[#1E293B]/50">
                 <td className="px-4 py-3 font-semibold text-slate-200">{row.vessel}</td>
                 <td className="px-4 py-3 text-slate-400">{row.route}</td>
                 <td className="px-4 py-3 text-slate-300 font-mono tracking-tight">{row.cargo}</td>

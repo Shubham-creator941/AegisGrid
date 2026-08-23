@@ -129,10 +129,12 @@ export default function Recommendations() {
   const selectedRank = ranking.find(r => r.candidate.id === selectedCandidateId);
 
   // Identify if selected is the recommended
-  const isSelectedRecommended = recommendation && recommendation.response_candidate_id === selectedCandidateId;
+  const isSelectedRecommended = Boolean(recommendation && recommendation.response_candidate_id === selectedCandidateId);
+  const selectedRankValue = selectedRank?.rank ?? (isSelectedRecommended ? recommendation?.rank : undefined);
 
   return (
-    <div className="h-full flex flex-col space-y-6 max-w-[1600px] mx-auto p-6 pb-12 overflow-y-auto w-full">
+    <div className="h-full w-full overflow-y-auto overflow-x-hidden pb-10">
+      <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-6">
       {/* Header */}
       <div>
         <Link to={`/app/evaluations?scenarioId=${evaluationResult.evaluation.scenario_id}`} className="text-sm text-slate-400 hover:text-slate-200 flex items-center gap-1 mb-4 transition-colors">
@@ -157,17 +159,17 @@ export default function Recommendations() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col flex-1">
-          <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] xl:grid-cols-[60%_40%] gap-6">
+        <div className="flex min-w-0 flex-col">
+          <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.85fr)] 2xl:gap-6">
           
           {/* LEFT: DECISION IMPACT */}
-          <div className="space-y-4 flex flex-col">
+          <div className="flex min-w-0 flex-col gap-4">
             <div>
               <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2 mb-1">Decision Impact</h2>
               <p className="text-[10px] text-slate-500 uppercase tracking-widest">Network effect of selected response</p>
             </div>
             
-            <div className="bg-[#0B1120] border border-[#1E293B] rounded-xl overflow-hidden shadow-sm relative min-h-[450px] flex-1">
+            <div className="relative h-[400px] overflow-hidden rounded-xl border border-[#1E293B] bg-[#0B1120] shadow-sm md:h-[440px]">
               <GeographicMap 
                 suppliers={networkData?.suppliers || []}
                 facilities={networkData?.facilities || []}
@@ -179,37 +181,21 @@ export default function Recommendations() {
               />
             </div>
             
-            {selectedCandidate ? (
-              <div className="bg-[#0B1120] border border-[#1E293B] rounded-xl p-5 shadow-sm mt-2">
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2 border-b border-[#1E293B] pb-2 mb-4">Contextual Information</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-[10px] text-slate-500 uppercase mb-1">Target Action</div>
-                    <div className="text-sm font-medium text-slate-200">{selectedCandidate.action_type || 'N/A'}</div>
-                  </div>
-                  {selectedCandidate.parameters && Object.entries(selectedCandidate.parameters)
-                    .filter(([key]) => key !== 'affected_node_ids')
-                    .map(([key, value]) => (
-                    <div key={key}>
-                      <div className="text-[10px] text-slate-500 uppercase mb-1">{key.replace(/_/g, ' ')}</div>
-                      <div className="text-sm font-mono text-slate-200">{String(value)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-[#0B1120]/50 border border-[#1E293B]/50 rounded-xl p-5 text-center shadow-sm mt-2">
+            {!selectedCandidate && (
+              <div className="rounded-xl border border-[#1E293B]/50 bg-[#0B1120]/50 p-5 text-center shadow-sm">
                 <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">Select a candidate to view network impact</p>
               </div>
             )}
           </div>
 
           {/* RIGHT: CANDIDATES & DETAIL */}
-          <div className="space-y-6 flex flex-col">
+          <div className="flex min-w-0 flex-col gap-4">
+            <div>
+              <h2 className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-300">Candidate Responses</h2>
+              <p className="text-[10px] uppercase tracking-widest text-slate-500">Ranked response options for this evaluation</p>
+            </div>
             {/* CANDIDATE LIST */}
-            <div className="space-y-4 overflow-y-auto shrink-0 max-h-[350px] border border-[#1E293B] bg-[#0B1120]/50 rounded-xl p-5 shadow-inner">
-            <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2 border-b border-[#1E293B] pb-2">Candidate Responses</h2>
-            
+            <div className="rounded-xl border border-[#1E293B] bg-[#0B1120]/50 p-4 shadow-inner">
             <div className="space-y-3">
               {responses.map(candidate => {
                 const isRecommended = recommendation.response_candidate_id === candidate.id;
@@ -217,6 +203,7 @@ export default function Recommendations() {
                 const cConstraint = constraints.find(c => c.response_candidate_id === candidate.id);
                 const cScore = scores.find(s => s.response_candidate_id === candidate.id);
                 const cRank = ranking.find(r => r.candidate.id === candidate.id);
+                const candidateRank = cRank?.rank ?? (isRecommended ? recommendation.rank : undefined);
 
                 return (
                   <div 
@@ -236,11 +223,11 @@ export default function Recommendations() {
                           </span>
                         )}
                         <h3 className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-200'}`}>{candidate.name}</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">{candidate.action_type}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{candidate.response_type || candidate.action_type}</p>
                       </div>
                       <div className="text-right">
-                        {cRank?.rank && (
-                          <div className="text-lg font-bold text-slate-300">#{cRank.rank}</div>
+                        {candidateRank && (
+                          <div className="text-lg font-bold text-slate-300">#{candidateRank}</div>
                         )}
                       </div>
                     </div>
@@ -274,9 +261,11 @@ export default function Recommendations() {
               })}
             </div>
             </div>
+          </div>
+        </div>
 
-            {/* Candidate Detail */}
-            <div className="flex-1 overflow-y-auto">
+            {/* Candidate Detail — full-width to avoid an empty companion column. */}
+            <div className="mt-6 min-w-0">
             
             {/* Candidate Detail */}
             {selectedCandidate ? (
@@ -297,16 +286,16 @@ export default function Recommendations() {
                       <h2 className="text-xl font-semibold text-slate-100">{selectedCandidate.name}</h2>
                       <p className="text-sm text-slate-400 mt-1">{selectedCandidate.description}</p>
                     </div>
-                    {selectedRank?.rank && (
+                    {selectedRankValue && (
                       <div className="bg-[#0B1120] px-4 py-2 rounded-lg border border-[#1E293B] text-center shadow-inner">
                         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Rank</div>
-                        <div className="text-xl font-light text-slate-200">#{selectedRank.rank}</div>
+                        <div className="text-xl font-light text-slate-200">#{selectedRankValue}</div>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+                <div className="flex-1 space-y-6 p-5">
                   {/* Stats Row */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-[#0B1120] p-4 rounded-lg border border-[#1E293B] shadow-inner">
@@ -327,7 +316,7 @@ export default function Recommendations() {
                     </div>
                     <div className="bg-[#0B1120] p-4 rounded-lg border border-[#1E293B] shadow-inner">
                       <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Target Action</div>
-                      <div className="text-sm font-semibold text-slate-300 mt-1">{selectedCandidate.action_type || 'N/A'}</div>
+                      <div className="text-sm font-semibold text-slate-300 mt-1">{selectedCandidate.response_type || selectedCandidate.action_type || 'N/A'}</div>
                     </div>
                   </div>
 
@@ -399,11 +388,9 @@ export default function Recommendations() {
               </div>
             )}
             </div>
-          </div>
-        </div>
 
         {/* DECISION INTERFACE */}
-        <div className="border border-[#1E293B] bg-[#0B1120] rounded-xl overflow-hidden shadow-sm mt-6">
+        <div className="mt-6 overflow-hidden rounded-xl border border-[#1E293B] bg-[#0B1120] shadow-sm">
               <div className="bg-[#0F172A]/50 px-6 py-4 border-b border-[#1E293B]">
                 <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-status-alternative shadow-[0_0_8px_var(--color-status-alternative)]"></div>
@@ -504,6 +491,7 @@ export default function Recommendations() {
 
         </div>
       )}
+      </div>
     </div>
   );
 }

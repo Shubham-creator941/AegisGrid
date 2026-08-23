@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import Events from '../Events';
 import * as useEventsModule from '../../features/events/hooks/useEvents';
 
@@ -11,6 +12,9 @@ vi.mock('../../features/events/hooks/useEvents', () => ({
 vi.mock('../../features/events/components/EventDetail', () => ({
   EventDetail: ({ event }: any) => <div data-testid="event-detail">{event.title}</div>
 }));
+vi.mock('../../features/events/components/EventWorkspace', () => ({
+  EventWorkspace: ({ event }: any) => <div data-testid="event-workspace">{event.title}</div>
+}));
 vi.mock('../../features/events/components/EvidenceList', () => ({
   EvidenceList: () => <div data-testid="evidence-list">Evidence List</div>
 }));
@@ -19,6 +23,7 @@ vi.mock('../../features/analysis/components/AnalysisWorkspace', () => ({
 }));
 
 describe('Events Page', () => {
+  const renderEvents = () => render(<MemoryRouter><Events /></MemoryRouter>);
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -30,7 +35,7 @@ describe('Events Page', () => {
       error: null,
     });
 
-    const { container } = render(<Events />);
+    const { container } = renderEvents();
     expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
   });
 
@@ -41,7 +46,7 @@ describe('Events Page', () => {
       error: 'Network Error',
     });
 
-    render(<Events />);
+    renderEvents();
     expect(screen.getByText('Unable to load events')).toBeInTheDocument();
     expect(screen.getByText(/Network Error/)).toBeInTheDocument();
   });
@@ -53,7 +58,7 @@ describe('Events Page', () => {
       error: null,
     });
 
-    render(<Events />);
+    renderEvents();
     expect(screen.getByText('No active events')).toBeInTheDocument();
   });
 
@@ -69,22 +74,19 @@ describe('Events Page', () => {
       error: null,
     });
 
-    render(<Events />);
+    renderEvents();
 
     // Check list rendered
-    expect(screen.getByText('Test Event 1')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Event 1')).toHaveLength(2);
     expect(screen.getByText('Test Event 2')).toBeInTheDocument();
 
     // Select an event
-    fireEvent.click(screen.getByText('Test Event 1'));
+    fireEvent.click(screen.getByRole('button', { name: /Test Event 1/ }));
 
     // Check detail rendered
-    expect(screen.getByTestId('event-detail')).toHaveTextContent('Test Event 1');
-    expect(screen.getByTestId('analysis-workspace')).toBeInTheDocument(); // Default tab
+    expect(screen.getByTestId('event-workspace')).toHaveTextContent('Test Event 1');
 
-    // Switch tabs
-    fireEvent.click(screen.getByText('Evidence Log'));
-    expect(screen.getByTestId('evidence-list')).toBeInTheDocument();
-    expect(screen.queryByTestId('analysis-workspace')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Test Event 2/ }));
+    expect(screen.getByTestId('event-workspace')).toHaveTextContent('Test Event 2');
   });
 });

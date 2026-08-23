@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, Line, ZoomableGroup } from 'react-simple-maps';
+import { Focus, Globe2 } from 'lucide-react';
 import type { Supplier, Facility, Corridor, SupplyFlow } from '../api/network.api';
 import geoData from './world-110m.json';
+import { overallTone } from '../utils/networkSemantics';
 
 interface GeographicMapProps {
   suppliers?: Supplier[];
@@ -40,12 +42,11 @@ const GEO_COORDINATES: Record<string, [number, number]> = {
   'Bosporus': [29.06, 41.22]
 };
 
-const getRiskColor = (status: string) => {
-  switch (status) {
-    case 'CRITICAL': return 'var(--color-status-critical)';
-    case 'DISRUPTED': return 'var(--color-status-warning)';
-    case 'MAINTENANCE': return 'var(--color-status-warning)';
-    case 'ACTIVE': return 'var(--color-status-normal)';
+const getRiskColor = (status: string, score?: number | null) => {
+  switch (overallTone(status, score)) {
+    case 'critical': return 'var(--color-status-critical)';
+    case 'warning': return 'var(--color-status-warning)';
+    case 'normal': return 'var(--color-status-normal)';
     default: return 'var(--color-status-neutral)';
   }
 };
@@ -60,7 +61,8 @@ export function GeographicMap({
   loading = false 
 }: GeographicMapProps) {
   
-  const [position, setPosition] = useState({ coordinates: [45, 25] as [number, number], zoom: 1.5 });
+  const networkPosition = { coordinates: [20, 20] as [number, number], zoom: 1 };
+  const [position, setPosition] = useState(networkPosition);
   const [tooltipContent, setTooltipContent] = useState<any>(null);
 
   const hasSelection = highlightedNodeIds && highlightedNodeIds.length > 0;
@@ -68,6 +70,10 @@ export function GeographicMap({
 
   // Pre-calculate routes
   const routes = useMemo(() => {
+    const selectedCorridorIds = new Set(
+      corridors.filter(c => highlightedNodeIds.includes(c.id)).map(c => c.id)
+    );
+
     return supplyFlows.map(flow => {
       const originFac = facilities.find(f => f.id === flow.origin_facility_id);
       const destFac = facilities.find(f => f.id === flow.destination_facility_id);
@@ -81,9 +87,11 @@ export function GeographicMap({
       
       if (!oCoords || !dCoords) return null;
       
-      const isFlowHighlighted = isHighlighted(flow.id) || 
-                               (isHighlighted(originFac.id) && isHighlighted(destFac.id)) ||
-                               (corridor && isHighlighted(corridor.id));
+      const isFlowHighlighted = selectedCorridorIds.size > 0
+        ? Boolean(corridor && selectedCorridorIds.has(corridor.id))
+        : isHighlighted(flow.id) ||
+          (isHighlighted(originFac.id) && isHighlighted(destFac.id)) ||
+          Boolean(corridor && isHighlighted(corridor.id));
       
       return {
         id: flow.id,
@@ -97,12 +105,12 @@ export function GeographicMap({
         isHighlighted: isFlowHighlighted
       };
     }).filter(Boolean);
-  }, [supplyFlows, facilities, corridors, isHighlighted]);
+  }, [supplyFlows, facilities, corridors, highlightedNodeIds, isHighlighted]);
 
   // If we have highlighted nodes but they didn't match any supply flow (e.g. a new reroute), 
   // construct a synthetic route so the map can render the recommendation.
   const syntheticRoutes = useMemo(() => {
-    if (!hasSelection || routes.some(r => r?.isHighlighted)) return [];
+    if (!hasSelection) return [];
     
     const hFacs = facilities.filter(f => isHighlighted(f.id));
     const hCorrs = corridors.filter(c => isHighlighted(c.id));
@@ -143,7 +151,7 @@ export function GeographicMap({
   // Auto-center viewport when highlighted nodes change
   useEffect(() => {
     if (!hasSelection) {
-      setPosition({ coordinates: [45, 25], zoom: 1.5 });
+      setPosition(networkPosition);
       return;
     }
 
@@ -191,7 +199,7 @@ export function GeographicMap({
 
   if (loading) {
     return (
-      <div className="h-full min-h-[500px] flex items-center justify-center bg-slate-950 rounded-[var(--radius-lg)] border border-slate-800">
+      <div className="h-full min-h-[320px] sm:min-h-[360px] lg:min-h-[420px] flex items-center justify-center bg-slate-950 rounded-[var(--radius-lg)] border border-slate-800">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-500"></div>
       </div>
     );
@@ -202,7 +210,7 @@ export function GeographicMap({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[500px] bg-aegis-panel flex flex-col overflow-hidden">
+    <div className="relative w-full h-full min-h-0 bg-aegis-panel flex flex-col overflow-hidden">
       
       <style>{`
         @keyframes dashFlow {
@@ -212,6 +220,8 @@ export function GeographicMap({
         .route-flow-animation {
           animation: dashFlow 1s linear infinite;
         }
+        .map-marker:hover { transform: scale(1.12); }
+        .map-marker { transform-box: fill-box; transform-origin: center; }
       `}</style>
 
       {/* Floating Route Label */}
@@ -230,7 +240,10 @@ export function GeographicMap({
         projection="geoMercator"
         width={800}
         height={600}
-        className="w-full h-full cursor-grab active:cursor-grabbing outline-none"
+        className="w-full h-full cursor-grab active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-aegis-blue focus-visible:outline-offset-[-2px]"
+        role="application"
+        aria-label="Interactive global supply network map"
+        tabIndex={0}
       >
         <ZoomableGroup 
           zoom={position.zoom} 
@@ -285,8 +298,10 @@ export function GeographicMap({
               }
             } else if (hasSelection) {
               // Existing Network when something is selected
-              opacity = 0.15;
-              strokeW = 1 / position.zoom;
+              const routeStatus = r.corridor?.status || r.status;
+              strokeColor = getRiskColor(routeStatus, r.corridor?.risk_score);
+              opacity = routeStatus === 'CRITICAL' || routeStatus === 'DISRUPTED' ? 0.65 : 0.35;
+              strokeW = (routeStatus === 'CRITICAL' || routeStatus === 'DISRUPTED' ? 2 : 1.25) / position.zoom;
             }
 
             const lineStyle = {
@@ -323,7 +338,12 @@ export function GeographicMap({
             );
 
             return (
-              <g key={r.id}>
+              <g
+                key={r.id}
+                className="cursor-pointer"
+                onMouseEnter={() => setTooltipContent({ type: 'Route', data: { name: `${r.originFac.name} → ${r.destFac.name}`, status: r.corridor?.status || r.status, corridor: r.corridor?.name } })}
+                onMouseLeave={() => setTooltipContent(null)}
+              >
                 {r.cCoords ? (
                   <>
                     {renderLine(r.oCoords, r.cCoords)}
@@ -342,14 +362,21 @@ export function GeographicMap({
             if (!coords) return null;
             
             const active = isHighlighted(corridor.id);
-            const isSubdued = hasSelection && !active;
+            const isHighRisk = overallTone(corridor.status, corridor.risk_score) === 'critical';
+            const isSubdued = hasSelection && !active && !isHighRisk;
             const scale = 1 / position.zoom;
-            const rColor = getRiskColor(corridor.status);
+            const rColor = getRiskColor(corridor.status, corridor.risk_score);
+            const isPetroline = corridor.name.includes('Petroline');
+            const labelX = isPetroline ? -14 * scale : (isHighRisk ? 14 * scale : 0);
+            const labelY = isPetroline ? 4 * scale : -12 * scale;
+            const labelAnchor = isPetroline ? 'end' : (isHighRisk ? 'start' : 'middle');
+            const mapLabel = isPetroline ? 'Saudi Petroline' : corridor.name;
             
             return (
               <Marker key={corridor.id} coordinates={coords}>
                 <g 
-                  style={{ opacity: isSubdued ? 0.3 : 1, transition: "all 0.3s ease", cursor: "pointer" }}
+                  className="map-marker"
+                  style={{ opacity: isSubdued ? 0.3 : 1, transition: "transform 0.15s ease, opacity 0.3s ease", cursor: "pointer" }}
                   onMouseEnter={() => setTooltipContent({ type: 'Chokepoint', data: corridor, coords })}
                   onMouseLeave={() => setTooltipContent(null)}
                 >
@@ -360,9 +387,14 @@ export function GeographicMap({
                     strokeWidth={1.5*scale}
                     style={{ filter: active ? `drop-shadow(0px 0px ${6*scale}px ${rColor})` : 'none' }}
                   />
-                  {active && (
-                    <text y={-16*scale} textAnchor="middle" fill="#F1F5F9" fontSize={11*scale} fontWeight="bold" style={{ textShadow: "0px 1px 4px #000" }}>
-                      {corridor.name}
+                  {(active || isHighRisk) && (
+                    <text x={labelX} y={labelY} textAnchor={labelAnchor} fill="#F1F5F9" fontSize={10*scale} fontWeight="bold" style={{ textShadow: "0px 1px 4px #000" }}>
+                      {mapLabel}
+                    </text>
+                  )}
+                  {isHighRisk && (
+                    <text x={14*scale} y={1*scale} textAnchor="start" fill={rColor} fontSize={8*scale} fontWeight="bold" style={{ textShadow: "0px 1px 4px #000" }}>
+                      RISK {corridor.risk_score ?? '—'} · {corridor.status}
                     </text>
                   )}
                 </g>
@@ -408,7 +440,8 @@ export function GeographicMap({
             return (
               <Marker key={facility.id} coordinates={coords}>
                 <g 
-                  style={{ opacity: isSubdued ? 0.3 : 1, transition: "all 0.3s ease", cursor: "pointer" }}
+                  className="map-marker"
+                  style={{ opacity: isSubdued ? 0.3 : 1, transition: "transform 0.15s ease, opacity 0.3s ease", cursor: "pointer" }}
                   onMouseEnter={() => setTooltipContent({ type: isOrigin ? 'Origin' : isDest ? 'Destination' : 'Facility', data: facility, coords })}
                   onMouseLeave={() => setTooltipContent(null)}
                 >
@@ -437,15 +470,15 @@ export function GeographicMap({
       </ComposableMap>
 
       {/* Map Legend */}
-      <div className="absolute bottom-6 left-6 z-10 bg-[#0B1120]/90 backdrop-blur-md border border-[#1E293B] shadow-xl p-4 rounded-[var(--radius-lg)] text-xs w-auto min-w-[200px] max-w-[250px]">
-        <div className="font-bold text-slate-200 uppercase tracking-widest mb-3 text-[10px]">Route Status</div>
-        <div className="flex flex-col gap-3">
+      <div className="absolute bottom-3 left-3 z-10 w-[min(330px,calc(100%-72px))] rounded-[var(--radius-md)] border border-[#1E293B] bg-[#0B1120]/92 p-3 text-[10px] shadow-xl backdrop-blur-md">
+        <div className="mb-2 font-bold uppercase tracking-widest text-slate-200">Route Status</div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
           <div className="flex items-center gap-3 text-slate-100 font-medium">
-            <div className="w-8 h-1 rounded-full bg-status-recommended shadow-[0_0_8px_var(--color-status-recommended)] shrink-0"></div>
+            <div className="w-6 h-1 rounded-full bg-status-recommended shadow-[0_0_8px_var(--color-status-recommended)] shrink-0"></div>
             <span className="truncate">Recommended</span>
           </div>
           <div className="flex items-center gap-3 text-slate-400">
-            <div className="w-8 h-[3px] bg-transparent border-t-2 border-dashed border-status-alternative shrink-0"></div>
+            <div className="w-6 h-[3px] bg-transparent border-t-2 border-dashed border-status-alternative shrink-0"></div>
             <span className="truncate">Alternative</span>
           </div>
           <div className="flex items-center gap-3 text-slate-200">
@@ -460,20 +493,51 @@ export function GeographicMap({
             <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-status-critical shrink-0"></div>
             <span className="truncate">Risk / Chokepoint</span>
           </div>
+          <div className="flex items-center gap-3 text-slate-200">
+            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-status-warning shrink-0"></div>
+            <span className="truncate">Elevated</span>
+          </div>
         </div>
       </div>
 
       {/* Zoom Controls */}
-      <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
+      <div className="absolute bottom-3 right-3 md:bottom-6 md:right-6 flex flex-col gap-2 z-10">
+        <button
+          onClick={() => setPosition(networkPosition)}
+          className="bg-aegis-base hover:bg-aegis-elevated active:bg-aegis-panel text-aegis-text-secondary hover:text-white w-9 h-9 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors"
+          aria-label="Fit network"
+          title="Fit Network"
+        >
+          <Globe2 size={15} />
+        </button>
+        <button
+          onClick={() => {
+            const route = allRoutes.find(r => r?.isHighlighted);
+            if (!route) return;
+            const points = [route.oCoords, route.dCoords, ...(route.cCoords ? [route.cCoords] : [])];
+            const lons = points.map(p => p[0]);
+            const lats = points.map(p => p[1]);
+            const maxDiff = Math.max(Math.max(...lons) - Math.min(...lons), Math.max(...lats) - Math.min(...lats), 10);
+            setPosition({ coordinates: [(Math.min(...lons) + Math.max(...lons)) / 2, (Math.min(...lats) + Math.max(...lats)) / 2], zoom: Math.min(6, 120 / maxDiff) });
+          }}
+          disabled={!hasSelection}
+          className="bg-aegis-base hover:bg-aegis-elevated active:bg-aegis-panel text-aegis-text-secondary hover:text-white w-9 h-9 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors"
+          aria-label="Fit recommendation"
+          title="Fit Recommendation"
+        >
+          <Focus size={15} />
+        </button>
         <button 
           onClick={() => setPosition(p => ({ ...p, zoom: Math.min(p.zoom * 1.5, 15) }))}
-          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue"
+          className="bg-aegis-base hover:bg-aegis-elevated active:bg-aegis-panel text-aegis-text-secondary hover:text-white w-9 h-9 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue"
+          aria-label="Zoom in"
         >
           +
         </button>
         <button 
           onClick={() => setPosition(p => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }))}
-          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue"
+          className="bg-aegis-base hover:bg-aegis-elevated active:bg-aegis-panel text-aegis-text-secondary hover:text-white w-9 h-9 rounded-[var(--radius-md)] shadow-lg flex items-center justify-center border border-aegis-border transition-colors outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue"
+          aria-label="Zoom out"
         >
           -
         </button>
@@ -487,7 +551,7 @@ export function GeographicMap({
           <div className="flex flex-col gap-1.5 text-xs">
             <div className="flex justify-between items-center">
               <span className="text-aegis-text-secondary">Status</span>
-              <span className="font-mono font-medium" style={{ color: getRiskColor(tooltipContent.data.status) }}>
+              <span className="font-mono font-medium" style={{ color: getRiskColor(tooltipContent.data.status, tooltipContent.data.risk_score) }}>
                 {tooltipContent.data.status}
               </span>
             </div>
@@ -501,6 +565,12 @@ export function GeographicMap({
               <div className="flex justify-between items-center">
                 <span className="text-aegis-text-secondary">Risk Profile</span>
                 <span className="text-white">{tooltipContent.data.corridor_type}</span>
+              </div>
+            )}
+            {tooltipContent.type === 'Route' && tooltipContent.data.corridor && (
+              <div className="flex justify-between items-center gap-4">
+                <span className="text-aegis-text-secondary">Via</span>
+                <span className="text-white text-right">{tooltipContent.data.corridor}</span>
               </div>
             )}
           </div>

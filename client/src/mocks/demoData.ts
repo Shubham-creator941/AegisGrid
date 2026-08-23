@@ -49,11 +49,25 @@ export const mockEvents: Event[] = [
     event_type: 'GEOPOLITICAL',
     severity: 'CRITICAL',
     status: 'ANALYZED',
-    occurred_at: new Date().toISOString(),
-    detected_at: new Date().toISOString(),
+    occurred_at: '2026-08-23T09:15:00.000Z',
+    detected_at: '2026-08-23T09:20:47.000Z',
     affected_region: 'Strait of Hormuz',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    created_at: '2026-08-23T09:20:47.000Z',
+    updated_at: '2026-08-23T10:30:00.000Z'
+  },
+  {
+    id: 'evt-2', title: 'Red Sea Shipping Disruption',
+    description: 'Commercial shipping disruption near Bab-el-Mandeb is forcing extended maritime rerouting.',
+    event_type: 'LOGISTICAL', severity: 'ELEVATED', status: 'ANALYZED',
+    occurred_at: '2026-08-23T08:30:00.000Z', detected_at: '2026-08-23T08:45:00.000Z', affected_region: 'Bab-el-Mandeb',
+    created_at: '2026-08-23T08:45:00.000Z', updated_at: '2026-08-23T10:10:00.000Z'
+  },
+  {
+    id: 'evt-3', title: 'Taiwan Strait Transit Risk',
+    description: 'Elevated transit risk in the Taiwan Strait requires continuous monitoring of commercial routes.',
+    event_type: 'GEOPOLITICAL', severity: 'MONITORING', status: 'OPEN',
+    occurred_at: '2026-08-22T11:10:00.000Z', detected_at: '2026-08-22T11:25:00.000Z', affected_region: 'Taiwan Strait',
+    created_at: '2026-08-22T11:25:00.000Z', updated_at: '2026-08-23T09:40:00.000Z'
   }
 ];
 

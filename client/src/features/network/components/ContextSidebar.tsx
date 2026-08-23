@@ -1,5 +1,6 @@
 import { ChevronUp, ChevronDown, Clock, ShieldAlert } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Link } from 'react-router-dom';
 
 export function ContextSidebar() {
   const marketData = [
@@ -72,7 +73,8 @@ export function ContextSidebar() {
       {/* Supply Risk Breakdown */}
       <div className="bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] p-5 flex flex-col shadow-sm">
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-[#1E293B] pb-2">Supply Risk Breakdown</h3>
-        <div className="h-32 w-full relative flex items-center justify-center">
+        <div className="h-36 w-full relative flex items-center">
+          <div className="h-full w-[48%] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -94,8 +96,9 @@ export function ContextSidebar() {
               />
             </PieChart>
           </ResponsiveContainer>
+          </div>
           {/* Custom Legend */}
-          <div className="absolute right-0 top-0 h-full flex flex-col justify-center gap-2 text-[10px] font-medium text-slate-400">
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-2 text-xs font-medium text-slate-400">
             {riskData.map(item => (
               <div key={item.name} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
@@ -149,9 +152,9 @@ export function ContextSidebar() {
             </div>
           ))}
         </div>
-        <button className="mt-4 text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition-colors text-left pt-2 border-t border-[#1E293B] outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue rounded p-0.5">
+        <Link to="/app/events" className="mt-4 text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 active:bg-slate-900 uppercase tracking-widest transition-colors text-left pt-2 border-t border-[#1E293B] rounded-[var(--radius-sm)] px-1.5 pb-1">
           View All Intelligence &rarr;
-        </button>
+        </Link>
       </div>
 
     </div>

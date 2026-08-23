@@ -27,15 +27,64 @@ export interface ImpactAssessment {
   created_at: string;
 }
 
+export interface EvaluationResponseCandidate {
+  id: string;
+  evaluation_id: string;
+  response_type?: string;
+  action_type?: string;
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+  status: string;
+}
+
+export interface EvaluationConstraint {
+  id: string;
+  response_candidate_id: string;
+  feasible: boolean;
+  violations: string[];
+  constraint_version?: string;
+  evaluated_at?: string;
+}
+
+export interface EvaluationScore {
+  id: string;
+  response_candidate_id: string;
+  overall_score: number;
+  dimension_scores?: Record<string, number>;
+  weights?: Record<string, number>;
+  scoring_version?: string;
+  calculated_at?: string;
+}
+
+export interface EvaluationRanking {
+  candidate: { id: string };
+  score?: { overall_score: number };
+  rank: number;
+}
+
+export interface EvaluationRecommendation {
+  id: string;
+  evaluation_id: string;
+  response_candidate_id: string;
+  rank: number;
+  score: number;
+  confidence: number;
+  rationale: string;
+  tradeoffs: string[];
+  uncertainty?: number;
+  created_at?: string;
+}
+
 export interface EvaluationResult {
   evaluation: Evaluation;
   simulation: any | null;
   impact: ImpactAssessment | null;
-  responses: any[];
-  constraints: any[];
-  scores: any[];
-  ranking: any[];
-  recommendation: any | null;
+  responses: EvaluationResponseCandidate[];
+  constraints: EvaluationConstraint[];
+  scores: EvaluationScore[];
+  ranking: EvaluationRanking[];
+  recommendation: EvaluationRecommendation | null;
 }
 
 export const EvaluationsApi = {

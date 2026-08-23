@@ -69,10 +69,10 @@ export default function Audit() {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleString(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
+      const date = new Date(dateString);
+      const day = date.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+      const time = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `${day} · ${time}`;
     } catch {
       return dateString;
     }
@@ -88,7 +88,7 @@ export default function Audit() {
 
   if (error) {
     return (
-      <div className="h-full p-6 max-w-6xl mx-auto">
+      <div className="mx-auto h-full w-full max-w-6xl overflow-y-auto p-6">
         <div className="bg-slate-900 border border-slate-800 p-8 rounded-xl text-center">
           <ShieldAlert className="mx-auto text-red-500 mb-4" size={48} />
           <h2 className="text-xl font-bold text-slate-100 mb-2">Access Restricted</h2>
@@ -99,7 +99,7 @@ export default function Audit() {
   }
 
   return (
-    <div className="h-full flex flex-col max-w-7xl mx-auto pb-12">
+    <div className="flex h-full w-full flex-col overflow-y-auto pb-10">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
@@ -110,10 +110,10 @@ export default function Audit() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+      <div className="grid flex-none grid-cols-1 gap-5 min-[1350px]:min-h-0 min-[1350px]:flex-1 min-[1350px]:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] xl:gap-6">
         
         {/* MAIN LIST */}
-        <div className="lg:col-span-2 flex flex-col bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
+        <div className="flex min-h-[500px] min-w-0 flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg min-[1350px]:min-h-0">
           
           {/* Filters Bar */}
           <div className="bg-slate-950 p-4 border-b border-slate-800">
@@ -182,7 +182,13 @@ export default function Audit() {
                 </div>
               </div>
             ) : data && data.data.length > 0 ? (
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[680px] table-fixed border-collapse text-left">
+                <colgroup>
+                  <col className="w-[26%]" />
+                  <col className="w-[25%]" />
+                  <col className="w-[21%]" />
+                  <col className="w-[28%]" />
+                </colgroup>
                 <thead className="sticky top-0 bg-slate-950 shadow-md">
                   <tr>
                     <th className="py-3 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">Timestamp</th>
@@ -198,29 +204,29 @@ export default function Audit() {
                       onClick={() => setSelectedRecord(log)}
                       className={`cursor-pointer transition-colors ${selectedRecord?.id === log.id ? 'bg-purple-900/20 hover:bg-purple-900/30' : 'hover:bg-slate-800/50'}`}
                     >
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <Clock size={12} className="text-slate-500" />
-                          <span className="text-sm text-slate-300 font-mono">{formatDate(log.created_at)}</span>
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-0 items-start gap-2">
+                          <Clock size={12} className="shrink-0 text-slate-500" />
+                          <span className="min-w-0 break-words text-xs font-mono leading-5 text-slate-300" title={new Date(log.created_at).toLocaleString()}>{formatDate(log.created_at)}</span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border ${getActionBadge(log.action)}`}>
+                      <td className="px-4 py-3">
+                        <span title={log.action} className={`inline-flex max-w-full break-all rounded border px-2 py-0.5 text-[10px] font-bold leading-4 tracking-wider ${getActionBadge(log.action)}`}>
                           {log.action}
                         </span>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-1.5">
                           <User size={12} className="text-slate-500" />
                           <span className="text-sm text-slate-300 font-mono truncate max-w-[120px]" title={log.actor_id}>{log.actor_id}</span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-1.5">
                           <Box size={12} className="text-slate-500" />
                           <span className="text-sm text-slate-400">{log.entity_type}</span>
                           <span className="text-slate-600 text-xs mx-0.5">/</span>
-                          <span className="text-xs text-slate-300 font-mono truncate max-w-[100px]" title={log.entity_id}>{log.entity_id.split('-')[0]}</span>
+                          <span className="min-w-0 break-all text-xs font-mono text-slate-300" title={log.entity_id}>{log.entity_id}</span>
                         </div>
                       </td>
                     </tr>
@@ -275,7 +281,7 @@ export default function Audit() {
         </div>
 
         {/* DETAILS SIDEBAR */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg flex flex-col h-[600px] lg:h-auto">
+        <div className="flex h-[480px] min-w-0 flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg min-[1350px]:h-auto">
           <div className="bg-slate-950 px-5 py-4 border-b border-slate-800">
             <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Record Details</h2>
           </div>
@@ -342,30 +348,22 @@ export default function Audit() {
                   </div>
                 )}
 
-                {/* Raw States */}
+                {/* Human-readable state summaries */}
                 {selectedRecord.before_state && Object.keys(selectedRecord.before_state).length > 0 && (
                   <div className="mt-6">
                     <div className="text-[10px] text-[#657994] font-bold uppercase tracking-wider mb-2">
                       BEFORE STATE
                     </div>
-                    <div className="bg-[#060B18] rounded-lg border border-[#1E304D] p-4 max-h-48 overflow-x-auto overflow-y-auto">
-                      <pre className="text-[11px] font-mono text-[#91A4BF]">
-                        {JSON.stringify(selectedRecord.before_state, null, 2)}
-                      </pre>
-                    </div>
+                    <ObjectSummary data={selectedRecord.before_state} />
                   </div>
                 )}
 
-                {selectedRecord.after_state && Object.keys(selectedRecord.after_state).length > 0 && (
+                {selectedRecord.entity_type !== 'Decision' && selectedRecord.after_state && Object.keys(selectedRecord.after_state).length > 0 && (
                   <div className="mt-6">
                     <div className="text-[10px] text-[#657994] font-bold uppercase tracking-wider mb-2">
                       AFTER STATE
                     </div>
-                    <div className="bg-[#060B18] rounded-lg border border-[#1E304D] p-4 max-h-48 overflow-x-auto overflow-y-auto">
-                      <pre className="text-[11px] font-mono text-[#91A4BF]">
-                        {JSON.stringify(selectedRecord.after_state, null, 2)}
-                      </pre>
-                    </div>
+                    <ObjectSummary data={selectedRecord.after_state} />
                   </div>
                 )}
 
@@ -374,11 +372,7 @@ export default function Audit() {
                     <div className="text-[10px] text-[#657994] font-bold uppercase tracking-wider mb-2">
                       METADATA
                     </div>
-                    <div className="bg-[#060B18] rounded-lg border border-[#1E304D] p-4 overflow-x-auto overflow-y-auto">
-                      <pre className="text-[11px] font-mono text-[#91A4BF]">
-                        {JSON.stringify(selectedRecord.metadata, null, 2)}
-                      </pre>
-                    </div>
+                    <ObjectSummary data={selectedRecord.metadata} />
                   </div>
                 )}
               </div>
@@ -395,4 +389,18 @@ export default function Audit() {
       </div>
     </div>
   );
+}
+
+function ObjectSummary({ data }: { data: Record<string, unknown> }) {
+  return <div className="divide-y divide-[#1E304D] overflow-hidden rounded-lg border border-[#1E304D] bg-[#060B18]">{Object.entries(data).map(([key, value]) => <div key={key} className="grid min-w-0 grid-cols-[minmax(110px,0.8fr)_minmax(0,1.2fr)] gap-3 px-4 py-3"><div className="break-words text-[10px] font-bold uppercase tracking-wider text-[#657994]">{humanizeKey(key)}</div><SummaryValue value={value} /></div>)}</div>;
+}
+
+function SummaryValue({ value }: { value: unknown }) {
+  if (Array.isArray(value)) return <div className="flex min-w-0 flex-wrap gap-1.5">{value.map((item, index) => <span key={`${String(item)}-${index}`} className="max-w-full break-all rounded border border-slate-700 bg-slate-900 px-2 py-0.5 font-mono text-[11px] text-slate-300">{String(item)}</span>)}</div>;
+  if (value && typeof value === 'object') return <div className="min-w-0 space-y-1">{Object.entries(value as Record<string, unknown>).map(([key, nested]) => <div key={key} className="flex min-w-0 flex-wrap gap-x-2 text-[11px]"><span className="text-slate-500">{humanizeKey(key)}:</span><span className="break-all font-mono text-slate-300">{String(nested)}</span></div>)}</div>;
+  return <div className="min-w-0 break-words font-mono text-xs text-slate-300">{value === null || value === undefined ? 'Not recorded' : typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}</div>;
+}
+
+function humanizeKey(value: string) {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, character => character.toUpperCase());
 }

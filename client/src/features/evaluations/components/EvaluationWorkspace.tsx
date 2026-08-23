@@ -56,6 +56,12 @@ export default function EvaluationWorkspace() {
   const isRunning = evaluation?.status === 'PENDING' || evaluation?.status === 'RUNNING';
   const isFailed = evaluation?.status === 'FAILED';
   const isCompleted = evaluation?.status === 'COMPLETED';
+  const candidates = evaluationResult?.responses || [];
+  const canCompareRecommendations = Boolean(evaluationResult?.recommendation && candidates.length > 0);
+
+  if (loading && !evaluation) {
+    return <div className="flex h-full items-center justify-center text-sm text-aegis-text-secondary"><Activity size={18} className="mr-3 animate-pulse text-aegis-blue" />Loading evaluation…</div>;
+  }
 
   return (
     <div className="h-full flex flex-col space-y-6 overflow-y-auto pb-8">
@@ -118,7 +124,7 @@ export default function EvaluationWorkspace() {
           <AlertCircle className="text-red-500 mt-0.5" size={18} />
           <div>
             <h3 className="text-sm font-medium text-red-500">Evaluation Error</h3>
-            <p className="text-sm text-red-400/80 mt-1">{error.message}</p>
+            <p className="text-sm text-red-400/80 mt-1">Unable to load this evaluation. Verify the evaluation link or return to Scenarios.</p>
           </div>
         </div>
       )}
@@ -174,11 +180,31 @@ export default function EvaluationWorkspace() {
           <p className="text-sm text-red-400/70 mt-2 max-w-md text-center">
             The engine encountered an error during evaluation. No recommendation was generated.
           </p>
+          <button onClick={() => navigate('/app/scenarios')} className="mt-5 rounded-md border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700">Back to Scenarios</button>
         </div>
       )}
 
       {isCompleted && evaluationResult && (
         <div className="space-y-6">
+          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 bg-slate-800/50 px-5 py-4">
+              <div><h3 className="text-sm font-semibold text-slate-200">Candidate Responses</h3><p className="mt-1 text-xs text-slate-500">Persisted feasibility, scoring, and recommendation results.</p></div>
+              {canCompareRecommendations && <button onClick={() => navigate(`/app/recommendations?evaluationId=${encodeURIComponent(evaluationId)}`)} className="flex h-10 items-center gap-2 rounded-md bg-aegis-blue px-4 text-sm font-semibold text-white hover:bg-aegis-blue-hover">Compare Recommendations <ArrowRight size={16} /></button>}
+            </div>
+            {candidates.length ? <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-2">{candidates.map(candidate => {
+              const constraint = evaluationResult.constraints.find(item => item.response_candidate_id === candidate.id);
+              const score = evaluationResult.scores.find(item => item.response_candidate_id === candidate.id);
+              const ranking = evaluationResult.ranking.find(item => item.candidate.id === candidate.id);
+              const recommended = evaluationResult.recommendation?.response_candidate_id === candidate.id;
+              const rank = ranking?.rank ?? (recommended ? evaluationResult.recommendation?.rank : undefined);
+              const feasible = constraint?.feasible ?? candidate.status === 'FEASIBLE';
+              return <article key={candidate.id} className={`min-w-0 rounded-lg border p-4 ${recommended ? 'border-aegis-cyan/40 bg-aegis-cyan/5' : 'border-slate-800 bg-slate-950/35'}`}>
+                <div className="flex items-start justify-between gap-4"><div className="min-w-0">{recommended && <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-aegis-cyan">System Recommended</div>}<h4 className="break-words text-sm font-semibold text-white">{candidate.name}</h4><p className="mt-1 text-xs text-slate-500">{candidate.response_type || candidate.action_type || 'Response'}</p></div>{rank && <span className="shrink-0 text-lg font-bold text-slate-300">#{rank}</span>}</div>
+                <div className="mt-4 grid grid-cols-3 gap-3 border-t border-slate-800 pt-3"><Metric label="Feasibility" value={feasible ? 'FEASIBLE' : 'INFEASIBLE'} tone={feasible ? 'good' : 'bad'} /><Metric label="Score" value={score?.overall_score != null ? Number(score.overall_score).toFixed(2) : '—'} /><Metric label="Violations" value={String(constraint?.violations?.length || 0)} tone={constraint?.violations?.length ? 'bad' : 'muted'} /></div>
+              </article>;
+            })}</div> : <div className="p-5 text-sm text-slate-500">No response candidates were generated for this evaluation.</div>}
+          </div>
+
           {/* CASCADING IMPACT VISUALIZATION */}
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
             <h3 className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-6 flex items-center gap-2">
@@ -239,26 +265,16 @@ export default function EvaluationWorkspace() {
               {expandedSection === 'impact' && (
                 <div className="p-4 border-t border-slate-700/50">
                   {evaluationResult.impact ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-slate-900/50 p-3 rounded border border-slate-800">
-                        <p className="text-xs text-slate-500 mb-1">Supply Impact</p>
-                        <p className="text-sm text-slate-200 font-mono">{(evaluationResult.impact.supply_impact * 100).toFixed(2)}%</p>
+                    <div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        <ImpactMetric label="Supply" value={evaluationResult.impact.supply_impact} />
+                        <ImpactMetric label="Economic" value={evaluationResult.impact.economic_impact} />
+                        <ImpactMetric label="Operational" value={evaluationResult.impact.operational_impact} />
+                        <ImpactMetric label="Resilience" value={evaluationResult.impact.resilience_impact} />
                       </div>
-                      <div className="bg-slate-900/50 p-3 rounded border border-slate-800">
-                        <p className="text-xs text-slate-500 mb-1">Economic Impact</p>
-                        <p className="text-sm text-slate-200 font-mono">{(evaluationResult.impact.economic_impact * 100).toFixed(2)}%</p>
-                      </div>
-                      <div className="bg-slate-900/50 p-3 rounded border border-slate-800">
-                        <p className="text-xs text-slate-500 mb-1">Operational Impact</p>
-                        <p className="text-sm text-slate-200 font-mono">{(evaluationResult.impact.operational_impact * 100).toFixed(2)}%</p>
-                      </div>
-                      <div className="bg-slate-900/50 p-3 rounded border border-slate-800">
-                        <p className="text-xs text-slate-500 mb-1">Resilience Impact</p>
-                        <p className="text-sm text-slate-200 font-mono">{(evaluationResult.impact.resilience_impact * 100).toFixed(2)}%</p>
-                      </div>
-                      <div className="col-span-full text-xs text-slate-500 flex items-center gap-2 mt-2">
+                      <div className="mt-4 flex items-center gap-2 border-t border-slate-800 pt-3 text-[11px] text-slate-500">
                         <Info size={14} />
-                        Engine Calculation Version: <span className="font-mono">{evaluationResult.impact.calculation_version}</span>
+                        Calculation engine <span className="font-mono text-slate-400">v{evaluationResult.impact.calculation_version}</span>
                       </div>
                     </div>
                   ) : (
@@ -284,10 +300,18 @@ export default function EvaluationWorkspace() {
               {expandedSection === 'sim' && (
                 <div className="p-4 border-t border-slate-700/50">
                   {evaluationResult.simulation ? (
-                    <div className="text-sm text-slate-300">
-                      <pre className="font-mono text-xs bg-slate-900 p-4 rounded overflow-auto text-slate-400">
-                        {JSON.stringify(evaluationResult.simulation, null, 2)}
-                      </pre>
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                      <TelemetryMetric label="Projected Shortfall" value={formatVolume(evaluationResult.simulation.shortfall)} tone="warning" />
+                      <TelemetryMetric label="Affected Flows" value={`${evaluationResult.simulation.affected_flow_ids?.length || 0} routes`} />
+                      <TelemetryMetric label="Network Snapshot" value={formatTelemetryTime(evaluationResult.simulation.network_state?.timestamp)} />
+                      {evaluationResult.simulation.affected_flow_ids?.length > 0 && (
+                        <div className="rounded-lg border border-slate-800 bg-slate-950/55 p-4 lg:col-span-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Affected flow IDs</p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {evaluationResult.simulation.affected_flow_ids.map((flowId: string) => <span key={flowId} className="rounded border border-orange-500/20 bg-orange-500/5 px-2.5 py-1 font-mono text-xs text-orange-300">{flowId}</span>)}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex items-start gap-3 bg-slate-900/30 p-4 rounded border border-slate-800">
@@ -304,45 +328,34 @@ export default function EvaluationWorkspace() {
               )}
             </div>
 
-            {/* Candidate Responses summary */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden p-0">
-              <div className="w-full flex items-center justify-between p-4 bg-slate-800/50 border-b border-slate-700/50">
-                <span className="font-medium text-slate-200 flex items-center gap-2">
-                  <ArrowRight size={18} className="text-slate-400" />
-                  Generated Candidate Responses
-                </span>
-                <span className="bg-slate-800 text-slate-300 border border-slate-700 rounded-full px-2 py-0.5 text-xs">{evaluationResult.responses?.length || 0} Generated</span>
-              </div>
-              
-              <div className="p-4">
-                {evaluationResult.responses && evaluationResult.responses.length > 0 ? (
-                  <div className="space-y-3">
-                    {evaluationResult.responses.map(resp => (
-                      <div key={resp.id} className="flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded">
-                        <div>
-                          <p className="text-sm text-slate-200 font-medium">{resp.action_type}</p>
-                          <p className="text-xs text-slate-500 mt-1">ID: {resp.id}</p>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${resp.status === 'FEASIBLE' ? 'bg-green-900/30 text-green-400 border-green-900/50' : 'bg-orange-900/30 text-orange-400 border-orange-900/50'}`}>{resp.status}</span>
-                      </div>
-                    ))}
-                    <div className="mt-4 pt-4 border-t border-slate-800 flex justify-end">
-                      <button 
-                        onClick={() => navigate(`/app/recommendations?evaluationId=${evaluationId}`)}
-                        className="text-sm text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1"
-                      >
-                        Compare Recommendations <ArrowRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500">No candidate responses were generated.</p>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function ImpactMetric({ label, value }: { label: string; value: number }) {
+  const percentage = Math.max(0, Math.min(100, value * 100));
+  const tone = percentage >= 60 ? 'bg-red-500' : percentage >= 40 ? 'bg-orange-500' : 'bg-cyan-400';
+  return <div className="rounded-lg border border-slate-800 bg-slate-950/55 p-4"><div className="flex items-end justify-between gap-3"><span className="text-xs text-slate-400">{label} impact</span><span className="text-lg font-semibold tabular-nums text-slate-100">{percentage.toFixed(0)}%</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800"><div className={`h-full rounded-full ${tone}`} style={{ width: `${percentage}%` }} /></div></div>;
+}
+
+function TelemetryMetric({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'warning' }) {
+  return <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-950/55 p-4"><p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p><p className={`mt-2 break-words text-base font-semibold ${tone === 'warning' ? 'text-orange-300' : 'text-slate-100'}`}>{value}</p></div>;
+}
+
+function formatVolume(value: unknown) {
+  return typeof value === 'number' ? `${new Intl.NumberFormat().format(value)} bbl` : 'Not available';
+}
+
+function formatTelemetryTime(value: unknown) {
+  if (typeof value !== 'string') return 'Not available';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+
+function Metric({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'good' | 'bad' | 'muted' }) {
+  const color = tone === 'good' ? 'text-aegis-green' : tone === 'bad' ? 'text-aegis-red' : tone === 'muted' ? 'text-aegis-text-muted' : 'text-slate-200';
+  return <div className="min-w-0"><div className="text-[9px] font-bold uppercase tracking-wider text-slate-500">{label}</div><div className={`mt-1 truncate text-xs font-semibold ${color}`}>{value}</div></div>;
 }

@@ -1,22 +1,31 @@
 import { ShieldAlert, TrendingUp, ArrowRight } from 'lucide-react';
 import type { Supplier, SupplyFlow, Facility, Corridor } from '../api/network.api';
 import { GeographicMap } from './GeographicMap';
+import { riskLabel, riskTone, statusTone, toneBadgeClass, toneDotClass, toneTextClass } from '../utils/networkSemantics';
 
 interface Props {
   supplier: Supplier;
   facilities: Facility[];
   corridors: Corridor[];
   supplyFlows: SupplyFlow[];
+  onSimulate: () => void;
 }
 
-export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }: Props) {
+export function SupplierDetails({ supplier, facilities, corridors, supplyFlows, onSimulate }: Props) {
   // Find related flows
   const relatedFlows = supplyFlows.filter(f => f.supplier_id === supplier.id);
+  const primaryCorridor = corridors.find(c => c.name === supplier.primary_corridor);
+  const highlightedNodeIds = relatedFlows.flatMap(flow => [flow.origin_facility_id, flow.destination_facility_id, flow.corridor_id]);
+  const corridorRisk = primaryCorridor?.risk_score;
+  const supplierStatusTone = statusTone(supplier.status);
+  const supplierRiskTone = riskTone(supplier.risk_score);
+  const corridorStatusTone = statusTone(primaryCorridor?.status);
+  const corridorRiskTone = riskTone(corridorRisk);
   
   return (
     <div className="flex flex-col h-full bg-aegis-base">
       {/* Header */}
-      <div className="p-6 border-b border-aegis-border bg-aegis-panel flex justify-between items-start">
+      <div className="p-6 border-b border-aegis-border bg-aegis-panel flex flex-wrap justify-between items-start gap-4">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-aegis-border">
             {/* simple flag placeholder */}
@@ -31,11 +40,11 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider bg-aegis-green/20 text-aegis-green border border-aegis-green/30 uppercase flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-aegis-green"></span>
-            Operational
+          <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5 ${toneBadgeClass[supplierStatusTone]}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${toneDotClass[supplierStatusTone]}`}></span>
+            {supplier.status}
           </span>
-          <button className="bg-transparent hover:bg-aegis-blue/10 text-aegis-blue border border-aegis-blue/50 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+          <button onClick={onSimulate} className="bg-transparent hover:bg-aegis-blue/10 active:bg-aegis-blue/20 text-aegis-blue border border-aegis-blue/50 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
             <ShieldAlert size={16} />
             Simulate Disruption
           </button>
@@ -44,7 +53,7 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
       
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* KPI Grid */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 min-[1600px]:grid-cols-4 gap-4">
           <div className="bg-aegis-base border border-aegis-border/60 rounded-xl p-4">
             <div className="text-[10px] text-aegis-text-muted uppercase tracking-widest mb-2">CURRENT SUPPLY</div>
             <div className="text-2xl font-bold text-white mb-1">{supplier.current_supply || '0.00M'} <span className="text-sm font-normal text-aegis-text-secondary">bbl/d</span></div>
@@ -65,8 +74,8 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
           <div className="bg-aegis-base border border-aegis-border/60 rounded-xl p-4">
             <div className="text-[10px] text-aegis-text-muted uppercase tracking-widest mb-2">RISK EXPOSURE</div>
             <div className="flex items-end gap-2 mb-1">
-              <div className={`text-2xl font-bold ${(supplier.risk_score || 0) > 60 ? 'text-aegis-red' : 'text-aegis-yellow'}`}>{supplier.risk_score || 0}</div>
-              {(supplier.risk_score || 0) > 60 && <span className="text-[9px] font-bold bg-aegis-red/20 text-aegis-red px-1.5 py-0.5 rounded border border-aegis-red/30 mb-1.5">CRITICAL</span>}
+              <div className={`text-2xl font-bold ${toneTextClass[supplierRiskTone]}`}>{supplier.risk_score ?? '—'}</div>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded mb-1.5 ${toneBadgeClass[supplierRiskTone]}`}>{riskLabel(supplier.risk_score)}</span>
             </div>
             <div className="flex items-center text-xs text-aegis-red">
               vs yesterday <TrendingUp size={12} className="ml-1 mr-0.5"/> {supplier.risk_trend || 0}
@@ -74,7 +83,7 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 min-[1600px]:grid-cols-3 gap-6">
           {/* Main Map Area */}
           <div className="col-span-2 space-y-4">
             <div className="flex flex-col h-[320px] bg-aegis-panel rounded-xl overflow-hidden border border-aegis-border relative">
@@ -96,7 +105,7 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
                   facilities={facilities} 
                   corridors={corridors} 
                   supplyFlows={relatedFlows} 
-                  highlightedNodeIds={[supplier.id, ...relatedFlows.map(f => f.corridor_id)]}
+                  highlightedNodeIds={highlightedNodeIds}
                 />
               </div>
             </div>
@@ -179,7 +188,7 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
                 </div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-aegis-text-secondary">Status</span>
-                  <span className="text-aegis-green font-medium">Operational</span>
+                  <span className={`font-medium ${toneTextClass[supplierStatusTone]}`}>{supplier.status}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-aegis-text-secondary">Primary Terminal</span>
@@ -207,18 +216,18 @@ export function SupplierDetails({ supplier, facilities, corridors, supplyFlows }
                 <div>
                   <div className="text-[10px] text-aegis-text-secondary mb-1">Risk Score</div>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-aegis-red">72</span><span className="text-xs text-aegis-text-muted mt-1">/100</span>
-                    <span className="text-[8px] font-bold bg-aegis-red/20 text-aegis-red px-1 rounded border border-aegis-red/30">CRITICAL</span>
+                    <span className={`text-lg font-bold ${toneTextClass[corridorRiskTone]}`}>{corridorRisk ?? '—'}</span><span className="text-xs text-aegis-text-muted mt-1">/100</span>
+                    <span className={`text-[8px] font-bold px-1 rounded ${toneBadgeClass[corridorStatusTone]}`}>{primaryCorridor?.status || 'UNAVAILABLE'}</span>
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] text-aegis-text-secondary mb-1">Status</div>
-                  <div className="text-sm text-aegis-red">Elevated Threat</div>
+                  <div className={`text-sm ${toneTextClass[corridorStatusTone]}`}>{primaryCorridor?.status || 'Not reported'}</div>
                 </div>
               </div>
               <div className="mt-3">
                 <div className="text-[10px] text-aegis-text-secondary mb-1">Throughput</div>
-                <div className="text-sm text-white">18.5M bbl/d</div>
+                <div className="text-sm text-white">{primaryCorridor?.current_throughput || 'Not reported'}</div>
               </div>
             </div>
             

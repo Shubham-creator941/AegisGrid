@@ -2,6 +2,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, L
 import { ArrivalsTable } from './ArrivalsTable';
 import { Activity } from 'lucide-react';
 import { PieChart as PieChartIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function AnalyticsPanels() {
   const volumeData = [
@@ -23,14 +24,14 @@ export function AnalyticsPanels() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1.2fr_0.9fr_1fr] gap-4 lg:gap-6 min-h-[380px] xl:h-[380px] mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 min-[1600px]:grid-cols-[1.2fr_0.9fr_1fr] gap-3 md:gap-4 xl:gap-5 2xl:gap-6 min-h-[380px] min-[1600px]:h-[380px] mb-4 md:mb-6">
       {/* Arrivals Table (Left, 1.2fr) */}
-      <div className="flex flex-col h-full bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] shadow-sm overflow-hidden min-h-[300px]">
+      <div className="flex flex-col h-full bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] shadow-sm overflow-hidden min-h-[300px] md:col-span-2 min-[1600px]:col-span-1">
         <ArrivalsTable />
       </div>
 
       {/* Volume by Corridor (Middle, 0.9fr) */}
-      <div className="flex flex-col h-full bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] shadow-sm overflow-hidden min-h-[300px]">
+      <div className="flex flex-col h-full bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] shadow-sm overflow-hidden min-h-[360px]">
         <div className="px-4 py-3 border-b border-[#1E293B] bg-[#0F172A]/50 shrink-0">
           <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
             <PieChartIcon size={14} className="text-status-recommended" />
@@ -38,16 +39,16 @@ export function AnalyticsPanels() {
             Volume by Corridor
           </h3>
         </div>
-        <div className="flex-1 flex flex-col p-5 overflow-hidden">
-          <div className="relative flex-1 min-h-[160px] w-full flex items-center justify-center">
+        <div className="grid flex-1 grid-cols-1 items-center gap-3 overflow-hidden p-4 min-[900px]:grid-cols-[minmax(180px,0.9fr)_minmax(190px,1.1fr)]">
+          <div className="relative h-[230px] min-w-0 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={volumeData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={65}
-                  outerRadius={95}
+                  innerRadius={58}
+                  outerRadius={88}
                   paddingAngle={2}
                   dataKey="value"
                   stroke="none"
@@ -71,7 +72,7 @@ export function AnalyticsPanels() {
             </div>
           </div>
           
-          <div className="mt-4 flex flex-col gap-2 shrink-0 overflow-y-auto max-h-[100px] pr-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <div className="flex min-w-0 flex-col justify-center gap-3 border-t border-[#1E293B] pt-3 min-[900px]:border-l min-[900px]:border-t-0 min-[900px]:pl-5 min-[900px]:pt-0">
             {volumeData.map(item => (
               <div key={item.name} className="flex justify-between items-center text-[11px]">
                 <div className="flex items-center gap-2 truncate">
@@ -86,15 +87,15 @@ export function AnalyticsPanels() {
       </div>
 
       {/* Reserve Cover Trend (Right, 1fr) */}
-      <div className="flex flex-col h-full bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] shadow-sm overflow-hidden min-h-[300px] md:col-span-2 xl:col-span-1">
+      <div className="flex flex-col h-full bg-[#0B1120] border border-[#1E293B] rounded-[var(--radius-lg)] shadow-sm overflow-hidden min-h-[300px] min-[1600px]:col-span-1">
         <div className="px-4 py-3 border-b border-[#1E293B] bg-[#0F172A]/50 shrink-0 flex justify-between items-center">
           <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
             <Activity size={14} className="text-status-normal" />
             Reserve Cover Trend <span className="text-slate-500 font-medium ml-1 capitalize tracking-normal">(Days)</span>
           </h3>
-          <button className="text-[10px] font-bold text-slate-400 hover:text-slate-200 uppercase tracking-widest transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-aegis-blue rounded p-0.5">
+          <Link to="/app/evaluations?evaluationId=eval-1" className="text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 active:bg-slate-900 uppercase tracking-widest transition-colors shrink-0 rounded-[var(--radius-sm)] px-1.5 py-1">
             Full Analysis &rarr;
-          </button>
+          </Link>
         </div>
         <div className="flex-1 p-5 pb-3 pl-0 overflow-hidden min-h-[160px]">
           <ResponsiveContainer width="100%" height="100%">
