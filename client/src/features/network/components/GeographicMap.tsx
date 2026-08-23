@@ -202,7 +202,7 @@ export function GeographicMap({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[500px] bg-[#0B1120] flex flex-col overflow-hidden">
+    <div className="relative w-full h-full min-h-[500px] bg-aegis-panel flex flex-col overflow-hidden">
       
       <style>{`
         @keyframes dashFlow {
@@ -216,8 +216,8 @@ export function GeographicMap({
 
       {/* Floating Route Label */}
       {hasSelection && selectedCandidateName && (
-        <div className="absolute top-6 right-6 z-10 bg-[#0B1120]/90 backdrop-blur-md border border-[#1E293B] shadow-2xl p-4 rounded-xl text-right max-w-sm">
-          <div className={`text-[10px] font-black uppercase tracking-widest mb-1.5 ${isSelectedRecommended ? 'text-[#22D3EE]' : 'text-slate-400'}`}>
+        <div className="absolute top-6 right-6 z-10 bg-aegis-base/90 backdrop-blur-md border border-aegis-border shadow-2xl p-4 rounded-xl text-right max-w-sm">
+          <div className={`text-[10px] font-black uppercase tracking-widest mb-1.5 ${isSelectedRecommended ? 'text-aegis-cyan' : 'text-aegis-text-secondary'}`}>
             {isSelectedRecommended ? '★ SYSTEM RECOMMENDED' : 'ALTERNATIVE RESPONSE'}
           </div>
           <div className="text-sm font-semibold text-white leading-tight">
@@ -245,12 +245,12 @@ export function GeographicMap({
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill="#1E293B"
-                  stroke="#0F172A"
+                  fill="#15213A"
+                  stroke="#223252"
                   strokeWidth={0.5 / position.zoom}
                   style={{
                     default: { outline: "none" },
-                    hover: { fill: "#334155", outline: "none" },
+                    hover: { fill: "#1c2b4b", outline: "none" },
                     pressed: { outline: "none" }
                   }}
                 />
@@ -436,27 +436,27 @@ export function GeographicMap({
       </ComposableMap>
 
       {/* Map Legend */}
-      <div className="absolute bottom-6 left-6 z-10 bg-[#0B1120]/90 backdrop-blur-sm border border-[#1E293B] shadow-xl p-4 rounded-xl text-xs w-48">
-        <div className="font-bold text-slate-300 uppercase tracking-widest mb-3 text-[10px]">Route Status</div>
+      <div className="absolute bottom-6 left-6 z-10 bg-aegis-base/90 backdrop-blur-sm border border-aegis-border shadow-xl p-4 rounded-xl text-xs w-48">
+        <div className="font-bold text-white uppercase tracking-widest mb-3 text-[10px]">Route Status</div>
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-center gap-3 text-slate-300 font-medium">
-            <div className="w-6 h-1 rounded-full bg-[#22D3EE] shadow-[0_0_8px_rgba(34,211,238,0.5)]"></div>
+          <div className="flex items-center gap-3 text-aegis-text font-medium">
+            <div className="w-6 h-1 rounded-full bg-aegis-cyan shadow-[0_0_8px_rgba(24,199,217,0.5)]"></div>
             Recommended
           </div>
-          <div className="flex items-center gap-3 text-slate-400">
-            <div className="w-6 h-[2px] bg-transparent border-t-2 border-dashed border-[#64748B]"></div>
+          <div className="flex items-center gap-3 text-aegis-text-secondary">
+            <div className="w-6 h-[2px] bg-transparent border-t-2 border-dashed border-aegis-text-muted"></div>
             Alternative
           </div>
-          <div className="flex items-center gap-3 text-slate-300">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]"></div>
+          <div className="flex items-center gap-3 text-white">
+            <div className="w-2.5 h-2.5 rounded-full bg-aegis-green"></div>
             Origin
           </div>
-          <div className="flex items-center gap-3 text-slate-300">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#A78BFA]"></div>
+          <div className="flex items-center gap-3 text-white">
+            <div className="w-2.5 h-2.5 rounded-full bg-aegis-purple"></div>
             Destination
           </div>
-          <div className="flex items-center gap-3 text-slate-300">
-            <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[8px] border-b-[#EF4444]"></div>
+          <div className="flex items-center gap-3 text-white">
+            <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[8px] border-b-aegis-red"></div>
             Risk / Chokepoint
           </div>
         </div>
@@ -466,13 +466,13 @@ export function GeographicMap({
       <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
         <button 
           onClick={() => setPosition(p => ({ ...p, zoom: Math.min(p.zoom * 1.5, 15) }))}
-          className="bg-[#1E293B] hover:bg-[#334155] text-slate-300 w-8 h-8 rounded-lg shadow-lg flex items-center justify-center border border-[#0F172A] transition-colors"
+          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-lg shadow-lg flex items-center justify-center border border-aegis-border transition-colors"
         >
           +
         </button>
         <button 
           onClick={() => setPosition(p => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }))}
-          className="bg-[#1E293B] hover:bg-[#334155] text-slate-300 w-8 h-8 rounded-lg shadow-lg flex items-center justify-center border border-[#0F172A] transition-colors"
+          className="bg-aegis-base hover:bg-aegis-elevated text-aegis-text-secondary hover:text-white w-8 h-8 rounded-lg shadow-lg flex items-center justify-center border border-aegis-border transition-colors"
         >
           -
         </button>
@@ -480,26 +480,26 @@ export function GeographicMap({
 
       {/* Tooltip */}
       {tooltipContent && (
-        <div className="absolute top-6 left-6 z-20 bg-[#0B1120] border border-slate-700 shadow-2xl p-4 rounded-lg min-w-[220px]">
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{tooltipContent.type}</div>
+        <div className="absolute top-6 left-6 z-20 bg-aegis-base border border-aegis-border shadow-2xl p-4 rounded-lg min-w-[220px]">
+          <div className="text-[10px] font-bold text-aegis-text-muted uppercase tracking-widest mb-1">{tooltipContent.type}</div>
           <div className="text-sm font-semibold text-white mb-3">{tooltipContent.data.name}</div>
           <div className="flex flex-col gap-1.5 text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Status</span>
+              <span className="text-aegis-text-secondary">Status</span>
               <span className="font-mono font-medium" style={{ color: getRiskColor(tooltipContent.data.status) }}>
                 {tooltipContent.data.status}
               </span>
             </div>
             {['Origin', 'Destination', 'Facility'].includes(tooltipContent.type) && (
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Region</span>
-                <span className="text-slate-300">{tooltipContent.data.region}</span>
+                <span className="text-aegis-text-secondary">Region</span>
+                <span className="text-white">{tooltipContent.data.region}</span>
               </div>
             )}
             {tooltipContent.type === 'Chokepoint' && (
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Risk Profile</span>
-                <span className="text-slate-300">{tooltipContent.data.corridor_type}</span>
+                <span className="text-aegis-text-secondary">Risk Profile</span>
+                <span className="text-white">{tooltipContent.data.corridor_type}</span>
               </div>
             )}
           </div>

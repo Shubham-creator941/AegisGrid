@@ -6,6 +6,18 @@ export interface Supplier {
   country: string;
   supplier_type: string;
   status: string;
+  
+  // Extended UI fields
+  current_supply?: string;
+  supply_share?: string;
+  active_routes?: number;
+  risk_score?: number;
+  risk_trend?: number;
+  primary_terminal?: string;
+  supply_reliability?: string;
+  primary_corridor?: string;
+  supply_trend?: number[];
+  
   created_at: string;
   updated_at: string;
 }
@@ -18,6 +30,12 @@ export interface Facility {
   region: string;
   capacity: number;
   status: string;
+
+  // Extended UI fields
+  current_throughput?: string;
+  risk_level?: string;
+  risk_score?: number;
+
   created_at: string;
   updated_at: string;
 }
@@ -30,6 +48,13 @@ export interface Corridor {
   destination: string;
   capacity: number;
   status: string;
+
+  // Extended UI fields
+  current_throughput?: string;
+  risk_score?: number;
+  direction?: string;
+  affected_regions?: string[];
+
   created_at: string;
   updated_at: string;
 }
