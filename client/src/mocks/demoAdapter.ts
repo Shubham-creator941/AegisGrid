@@ -1,6 +1,6 @@
 import { USE_DEMO_DATA } from '../config/demo.config';
 import * as demoData from './demoData';
-import { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
 
 export function setupDemoAdapter(client: AxiosInstance) {
   if (!USE_DEMO_DATA) return;
@@ -60,6 +60,26 @@ export function setupDemoAdapter(client: AxiosInstance) {
     }
     if (url.includes('/api/v1/scenarios') && method === 'get') {
       return respond(200, { success: true, data: demoData.mockScenarios, meta: { total: 1 } });
+    }
+    if (url.includes('/api/v1/scenarios') && method === 'post') {
+      // Mock creating a scenario
+      const body = JSON.parse(config.data as string);
+      return respond(201, {
+        success: true,
+        data: {
+          id: `scn-${Date.now()}`,
+          name: body.name,
+          description: body.description,
+          event_id: body.event_id,
+          status: 'READY',
+          scenario_version: 1,
+          start_time: new Date().toISOString(),
+          end_time: new Date(Date.now() + 86400000 * 30).toISOString(), // 30 days
+          created_by: body.created_by,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      });
     }
 
     // Evaluations
@@ -127,10 +147,11 @@ export function setupDemoAdapter(client: AxiosInstance) {
     }
 
     // Fallback to real backend if url doesn't match and we still want to allow it
-    if (originalAdapter) {
+    if (originalAdapter && typeof originalAdapter === 'function') {
       return originalAdapter(config);
     }
 
+    console.warn(`[Demo Adapter] Unmocked request: ${method?.toUpperCase()} ${url}`);
     return Promise.reject(new Error(`Demo Adapter: No mock found for ${method?.toUpperCase()} ${url}`));
   };
 }
