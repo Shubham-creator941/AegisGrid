@@ -14,10 +14,12 @@ export interface AuditLog {
 
 export interface PaginatedResult<T> {
   data: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
+  meta: {
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+  };
 }
 
 export interface AuditFilters {

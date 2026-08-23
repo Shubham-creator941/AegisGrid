@@ -245,7 +245,7 @@ export default function Audit() {
             <div className="text-slate-400">
               {data ? (
                 <>
-                  Showing <span className="text-slate-200 font-medium">{data.data.length > 0 ? (page - 1) * pageSize + 1 : 0}</span> to <span className="text-slate-200 font-medium">{Math.min(page * pageSize, data.total)}</span> of <span className="text-slate-200 font-medium">{data.total}</span> records
+                  Showing <span className="text-slate-200 font-medium">{data.data.length > 0 ? (page - 1) * pageSize + 1 : 0}</span> to <span className="text-slate-200 font-medium">{Math.min(page * pageSize, data.meta.total)}</span> of <span className="text-slate-200 font-medium">{data.meta.total}</span> records
                 </>
               ) : (
                 <span>&nbsp;</span>
@@ -261,10 +261,10 @@ export default function Audit() {
                 <ChevronLeft size={16} />
               </button>
               <span className="text-slate-400 px-2 font-medium">
-                Page {page} of {data?.totalPages || 1}
+                Page {page} of {data?.meta.total_pages || 1}
               </span>
               <button 
-                disabled={loading || !data || page >= data.totalPages}
+                disabled={loading || !data || page >= data.meta.total_pages}
                 onClick={() => setPage(p => p + 1)}
                 className="p-1.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
