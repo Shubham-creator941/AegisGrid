@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 
 const DATA_DIR = path.join(__dirname, '.pg-data');
-const DB_PORT = 5432;
+const DB_PORT = 5433;
 const DB_NAME = 'aegisgrid';
 
 async function main() {

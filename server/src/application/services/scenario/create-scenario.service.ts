@@ -22,11 +22,15 @@ export class CreateScenarioService {
       throw new Error('Event not found');
     }
 
+    const now = new Date();
     const newScenario = {
       name: input.name,
       description: input.description,
       event_id: input.event_id,
       status: 'DRAFT' as any,
+      scenario_version: 1,
+      start_time: now,
+      end_time: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // +30 days by default
       created_by: input.created_by
     };
     return await this.scenarioRepo.create(newScenario as any);
